@@ -27,6 +27,9 @@ body <- dashboardBody(
             h2("dataInput tab content")
     ),
     
+    tabItem(tabName = "pvca",
+            h2("pvca tab content")
+    ),
     tabItem(tabName = "elimination",
             h2("elimination tab content")
     )
