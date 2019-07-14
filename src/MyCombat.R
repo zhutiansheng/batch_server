@@ -2,6 +2,13 @@ combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE,
           mean.only = FALSE, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
 {
   ##inner function
+  dinvgamma<-function(x, shape, rate = 1/scale, scale = 1) 
+  {
+    stopifnot(shape > 0)
+    stopifnot(rate > 0)
+    ifelse(x <= 0, 0, ((rate^shape)/gamma(shape)) * x^(-shape - 
+                                                         1) * exp(-rate/x))
+  }
   bprior<-function(gamma.hat) 
   {
     m <- mean(gamma.hat)

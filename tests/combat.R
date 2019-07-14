@@ -1,6 +1,7 @@
+library(sva)
 library(bladderbatch)
 data(bladderdata)
-
+source("../src/MyCombat.R")
 dat <- bladderEset[1:50,]
 pheno = pData(dat)
 edata = exprs(dat)
