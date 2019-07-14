@@ -36,11 +36,10 @@ body <- dashboardBody(
   )
 )
 
-ui <- dashboardPage(skin = "purple",
-  dashboardHeader(title = "BatchEffect"),
-  sidebar,
-  body
+shiny::runApp(
+  #port = 80,
+  display.mode = "auto",
+  host = getOption("shiny.host", "0.0.0.0"),
+  quiet = T
+  #test.mode = T
 )
-server <- function(input, output) {
-}
-shinyApp(ui, server)
