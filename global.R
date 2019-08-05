@@ -1,3 +1,5 @@
 library(shiny)
 library(shinydashboard)
 library(sva)
+source(MyCombat.R)
+environment(combat) <- asNamespace('sva')

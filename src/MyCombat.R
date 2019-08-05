@@ -1,57 +1,6 @@
-combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE, 
+combat<-function (dat, batch, mod = NULL,  
           mean.only = FALSE, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
 {
-  ##inner function
-  dinvgamma<-function(x, shape, rate = 1/scale, scale = 1) 
-  {
-    stopifnot(shape > 0)
-    stopifnot(rate > 0)
-    ifelse(x <= 0, 0, ((rate^shape)/gamma(shape)) * x^(-shape - 
-                                                         1) * exp(-rate/x))
-  }
-  bprior<-function(gamma.hat) 
-  {
-    m <- mean(gamma.hat)
-    s2 <- var(gamma.hat)
-    (m * s2 + m^3)/s2
-  }
-  aprior<-function (gamma.hat) 
-  {
-    m <- mean(gamma.hat)
-    s2 <- var(gamma.hat)
-    (2 * s2 + m^2)/s2
-  }
-  it.sol<-function (sdat, g.hat, d.hat, g.bar, t2, a, b, conv = 1e-04) 
-  {
-    n <- rowSums(!is.na(sdat))
-    g.old <- g.hat
-    d.old <- d.hat
-    change <- 1
-    count <- 0
-    while (change > conv) {
-      g.new <- postmean(g.hat, g.bar, n, d.old, t2)
-      sum2 <- rowSums((sdat - g.new %*% t(rep(1, ncol(sdat))))^2, 
-                      na.rm = TRUE)
-      d.new <- postvar(sum2, n, a, b)
-      change <- max(abs(g.new - g.old)/g.old, abs(d.new - d.old)/d.old)
-      g.old <- g.new
-      d.old <- d.new
-      count <- count + 1
-    }
-    adjust <- rbind(g.new, d.new)
-    rownames(adjust) <- c("g.star", "d.star")
-    adjust
-  }
-  postmean<-function (g.hat, g.bar, n, d.star, t2) 
-  {
-    (t2 * n * g.hat + d.star * g.bar)/(t2 * n + d.star)
-  }
-  postvar<-function (sum2, n, a, b) 
-  {
-    (0.5 * sum2 + b)/(n/2 + a - 1)
-  }
-  
-    
   if (mean.only == TRUE) {
     message("Using the 'mean only' version of ComBat")
   }
@@ -178,33 +127,72 @@ combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE,
   t2 <- rowVars(gamma.hat)
   a.prior <- apply(delta.hat, 1, aprior)
   b.prior <- apply(delta.hat, 1, bprior)
-  if (prior.plots && par.prior) {
-    par(mfrow = c(2, 2))
-    tmp <- density(gamma.hat[1, ])
-    plot(tmp, type = "l", main = expression(paste("Density Plot of First Batch ", 
-                                                  hat(gamma))))
-    xx <- seq(min(tmp$x), max(tmp$x), length = 100)
-    lines(xx, dnorm(xx, gamma.bar[1], sqrt(t2[1])), col = 2)
-    qqnorm(gamma.hat[1, ], main = expression(paste("Normal Q-Q Plot of First Batch ", 
-                                                   hat(gamma))))
-    qqline(gamma.hat[1, ], col = 2)
-    tmp <- density(delta.hat[1, ])
-    xx <- seq(min(tmp$x), max(tmp$x), length = 100)
-    tmp1 <- list(x = xx, y = dinvgamma(xx, a.prior[1], b.prior[1]))
-    plot(tmp, typ = "l", ylim = c(0, max(tmp$y, tmp1$y)), 
-         main = expression(paste("Density Plot of First Batch ", 
-                                 hat(delta))))
-    lines(tmp1, col = 2)
-    invgam <- 1/qgamma(1 - ppoints(ncol(delta.hat)), a.prior[1], 
-                       b.prior[1])
-    qqplot(invgam, delta.hat[1, ], main = expression(paste("Inverse Gamma Q-Q Plot of First Batch ", 
-                                                           hat(delta))), ylab = "Sample Quantiles", xlab = "Theoretical Quantiles")
-    lines(c(0, max(invgam)), c(0, max(invgam)), col = 2)
+  
+  ####test norm distribution
+  isNorm<-function(d,bar,t2){
+    tryCatch({
+      f1 <- fitdist(d, "norm")
+      g1 <- gofstat(f1)
+    },
+    error = function(e) {
+      return(FALSE)
+    })
+    if(g1$kstest!="not rejected"){
+      return(FALSE)
+    }
+    else return(TRUE)
   }
+  ####test inverse gamma distribution
+  isInverseGamma<-function(d,a,b){
+    tryCatch({   
+      f2 <- fitdist(d, "invgamma", start=list(alpha=a, beta = b))
+      g2 <- gofstat(f2)
+      },
+      error = function(e) {
+                   return(FALSE)
+                 })
+    if(g2$kstest!="not rejected"){
+      return(FALSE)
+    }
+    else return(TRUE)
+
+  }
+  passTest<-bplapply(1:n.batch, function(i) {
+    norm.test=isNorm(gamma.hat[i,],gamma.bar[i], t2[i])
+    ig.test=isInverseGamma(delta.hat[i,],a.prior[i], b.prior[i])
+    return(norm.test & ig.test)
+  }, BPPARAM = BPPARAM)
+           
+  
+  # if (prior.plots && par.prior) {
+  #   par(mfrow = c(2, 2))
+  #   tmp <- density(gamma.hat[1, ])
+  #   plot(tmp, type = "l", main = expression(paste("Density Plot of First Batch ", 
+  #                                                 hat(gamma))))
+  #   xx <- seq(min(tmp$x), max(tmp$x), length = 100)
+  #   lines(xx, dnorm(xx, gamma.bar[1], sqrt(t2[1])), col = 2)
+  #   qqnorm(gamma.hat[1, ], main = expression(paste("Normal Q-Q Plot of First Batch ", 
+  #                                                  hat(gamma))))
+  #   qqline(gamma.hat[1, ], col = 2)
+  #   tmp <- density(delta.hat[1, ])
+  #   xx <- seq(min(tmp$x), max(tmp$x), length = 100)
+  #   tmp1 <- list(x = xx, y = dinvgamma(xx, a.prior[1], b.prior[1]))
+  #   plot(tmp, typ = "l", ylim = c(0, max(tmp$y, tmp1$y)), 
+  #        main = expression(paste("Density Plot of First Batch ", 
+  #                                hat(delta))))
+  #   lines(tmp1, col = 2)
+  #   invgam <- 1/qgamma(1 - ppoints(ncol(delta.hat)), a.prior[1], 
+  #                      b.prior[1])
+  #   qqplot(invgam, delta.hat[1, ], main = expression(paste("Inverse Gamma Q-Q Plot of First Batch ", 
+  #                                                          hat(delta))), ylab = "Sample Quantiles", xlab = "Theoretical Quantiles")
+  #   lines(c(0, max(invgam)), c(0, max(invgam)), col = 2)
+  # }
+  
   gamma.star <- delta.star <- matrix(NA, nrow = n.batch, ncol = nrow(s.data))
-  if (par.prior) {
+  if (sum(passTest==TRUE)>0) {
     message("Finding parametric adjustments")
-    results <- bplapply(1:n.batch, function(i) {
+    batchNum.par<-which(passTest==TRUE)
+    results <- bplapply(batchNum.par, function(i) {
       if (mean.only) {
         gamma.star <- postmean(gamma.hat[i, ], gamma.bar[i], 
                                1, 1, t2[i])
@@ -219,14 +207,15 @@ combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE,
       }
       list(gamma.star = gamma.star, delta.star = delta.star)
     }, BPPARAM = BPPARAM)
-    for (i in 1:n.batch) {
-      gamma.star[i, ] <- results[[i]]$gamma.star
-      delta.star[i, ] <- results[[i]]$delta.star
+    for (i in batchNum.par) {
+      gamma.star[i, ] <- results[[which(batchNum.par==i)]]$gamma.star
+      delta.star[i, ] <- results[[which(batchNum.par==i)]]$delta.star
     }
   }
-  else {
+  if (sum(passTest==FALSE)>0) {
     message("Finding nonparametric adjustments")
-    results <- bplapply(1:n.batch, function(i) {
+    batchNum.no<-which(passTest==FALSE)
+    results <- bplapply(batchNum.no, function(i) {
       if (mean.only) {
         delta.hat[i, ] = 1
       }
@@ -235,9 +224,9 @@ combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE,
       list(gamma.star = temp[1, ], delta.star = temp[2, 
                                                      ])
     }, BPPARAM = BPPARAM)
-    for (i in 1:n.batch) {
-      gamma.star[i, ] <- results[[i]]$gamma.star
-      delta.star[i, ] <- results[[i]]$delta.star
+    for (i in batchNum.no) {
+      gamma.star[i, ] <- results[[which(batchNum.no==i)]]$gamma.star
+      delta.star[i, ] <- results[[which(batchNum.no==i)]]$delta.star
     }
   }
   if (!is.null(ref.batch)) {
@@ -258,5 +247,6 @@ combat<-function (dat, batch, mod = NULL, par.prior = TRUE, prior.plots = FALSE,
   if (!is.null(ref.batch)) {
     bayesdata[, batches[[ref]]] <- dat[, batches[[ref]]]
   }
+  message(passTest)
   return(bayesdata)
 }
