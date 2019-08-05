@@ -128,6 +128,7 @@ combat<-function (dat, batch, mod = NULL,
   a.prior <- apply(delta.hat, 1, aprior)
   b.prior <- apply(delta.hat, 1, bprior)
   
+  addition_data<-list(gamm.hat=gamma.hat,delta.hat=delta.hat)
   ####test norm distribution
   isNorm<-function(d,bar,t2){
     tryCatch({
@@ -247,6 +248,6 @@ combat<-function (dat, batch, mod = NULL,
   if (!is.null(ref.batch)) {
     bayesdata[, batches[[ref]]] <- dat[, batches[[ref]]]
   }
-  message(passTest)
-  return(bayesdata)
+  cat(unlist(passTest))
+  return(list(bayesdata=bayesdata,additiondata=addition_data))
 }
