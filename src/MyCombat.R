@@ -1,4 +1,4 @@
-combat<-function (dat, batch, mod = NULL,  
+combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",  
           mean.only = FALSE, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
 {
   if (mean.only == TRUE) {
@@ -128,7 +128,6 @@ combat<-function (dat, batch, mod = NULL,
   a.prior <- apply(delta.hat, 1, aprior)
   b.prior <- apply(delta.hat, 1, bprior)
   
-  addition_data<-list(gamm.hat=gamma.hat,delta.hat=delta.hat)
   ####test norm distribution
   isNorm<-function(d,bar,t2){
     tryCatch({
@@ -158,12 +157,18 @@ combat<-function (dat, batch, mod = NULL,
     else return(TRUE)
 
   }
-  passTest<-bplapply(1:n.batch, function(i) {
-    norm.test=isNorm(gamma.hat[i,],gamma.bar[i], t2[i])
-    ig.test=isInverseGamma(delta.hat[i,],a.prior[i], b.prior[i])
-    return(norm.test & ig.test)
-  }, BPPARAM = BPPARAM)
-           
+  switch (par.prior,
+          "noparameter" = passTest<-lapply(1:n.batch,function(x)return(FALSE)),
+          "parameter" = passTest<-lapply(1:n.batch,function(x)return(TRUE)),
+          "auto" =   passTest<-bplapply(1:n.batch, function(i) {
+            norm.test=isNorm(gamma.hat[i,],gamma.bar[i], t2[i])
+            ig.test=isInverseGamma(delta.hat[i,],a.prior[i], b.prior[i])
+            return(norm.test & ig.test)
+          }, BPPARAM = BPPARAM)
+  )
+
+  addition_data<-list(gamm.hat=gamma.hat,delta.hat=delta.hat,passTest=passTest)
+  
   
   # if (prior.plots && par.prior) {
   #   par(mfrow = c(2, 2))
@@ -188,7 +193,7 @@ combat<-function (dat, batch, mod = NULL,
   #                                                          hat(delta))), ylab = "Sample Quantiles", xlab = "Theoretical Quantiles")
   #   lines(c(0, max(invgam)), c(0, max(invgam)), col = 2)
   # }
-  
+
   gamma.star <- delta.star <- matrix(NA, nrow = n.batch, ncol = nrow(s.data))
   if (sum(passTest==TRUE)>0) {
     message("Finding parametric adjustments")
@@ -248,6 +253,6 @@ combat<-function (dat, batch, mod = NULL,
   if (!is.null(ref.batch)) {
     bayesdata[, batches[[ref]]] <- dat[, batches[[ref]]]
   }
-  cat(unlist(passTest))
+  #cat(unlist(passTest))
   return(list(bayesdata=bayesdata,additiondata=addition_data))
 }

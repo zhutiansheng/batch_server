@@ -1,7 +1,7 @@
 library(sva)
 library(fitdistrplus)
 library(extraDistr)
-set.seed(1234)
+set.seed(12345)
 library(bladderbatch)
 data(bladderdata)
 source("src/MyCombat.R")
@@ -19,8 +19,9 @@ prior.plots = T
 mean.only = FALSE
 BPPARAM = bpparam("SerialParam")
 
-result<-combat(dat, batch, mod, 
+result<-combat(dat, batch, mod, par.prior="auto", fit.method="mle", 
                   mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
-resul2<-ComBat(dat, batch, mod, par.prior, prior.plots, 
+res<-result$bayesdata
+resul2<-ComBat(dat, batch, mod, par.prior=FALSE, prior.plots=FALSE, 
                mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
 dat[sample(1:50,10),sample(1:50,10)]<-NA
