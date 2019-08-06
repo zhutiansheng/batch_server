@@ -24,7 +24,44 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "dataInput",
-            h2("dataInput tab content")
+            # Input: Select a file ----
+            fileInput("myd", "Please Choose Your Data File",
+                      multiple = FALSE,
+                      accept = c("text/csv",
+                                 "text/comma-separated-values,text/plain",
+                                 ".csv")),
+            # Input: Checkbox if file has header ----
+            checkboxInput("header", "Header", TRUE),
+            
+            # Input: Select separator ----
+            radioButtons("sep", "Separator",
+                         choices = c(Comma = ",",
+                                     Semicolon = ";",
+                                     Tab = "\t"),
+                         selected = ",",inline = T),
+            
+            # Horizontal line ----
+            tags$hr(),
+            # Input: Select a file ----
+            fileInput("sample_info", "Please Choose Your Sample Information File",
+                      multiple = FALSE,
+                      accept = c("text/csv",
+                                 "text/comma-separated-values,text/plain",
+                                 ".csv")),
+            # Input: Checkbox if file has header ----
+            checkboxInput("sample_header", "Header", TRUE),
+            
+            # Input: Select separator ----
+            radioButtons("sample_sep", "Separator",
+                         choices = c(Comma = ",",
+                                     Semicolon = ";",
+                                     Tab = "\t"),
+                         selected = ",",inline = T),
+            
+            # Horizontal line ----
+            tags$hr(),
+            selectInput("batch_col","Select Batch Column Name",
+                        choices = NULL)
     ),
     
     tabItem(tabName = "pvca",

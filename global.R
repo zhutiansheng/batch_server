@@ -9,5 +9,5 @@ library(fitdistrplus)
 library(extraDistr)
 
 #import user defined functions
-source(MyCombat.R)
+source('src/MyCombat.R')
 environment(combat) <- asNamespace('sva')

@@ -1,5 +1,5 @@
 dashboardPage(skin = "purple",
-                    dashboardHeader(title = "BatchEffect"),
+                    dashboardHeader(title = "BatchServer"),
                     sidebar,
                     body
 )
