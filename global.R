@@ -7,7 +7,10 @@ library(shinydashboard)
 library(sva)
 library(fitdistrplus)
 library(extraDistr)
-
+library(umap)
+library(ggplot2)
 #import user defined functions
 source('src/MyCombat.R')
 environment(combat) <- asNamespace('sva')
+
+effect_name="Please upload your sample information file"

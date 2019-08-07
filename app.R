@@ -60,12 +60,19 @@ body <- dashboardBody(
             
             # Horizontal line ----
             tags$hr(),
-            selectInput("batch_col","Select Batch Column Name",
-                        choices = NULL)
+            actionButton("input_submit", "Submit", class = "btn-primary")
     ),
     
     tabItem(tabName = "pvca",
-            h2("pvca tab content")
+            selectInput("pvca_effect_name","Select Contributing Effect Column Name(s)",
+                        choices = effect_name,multiple = T),
+            actionButton("pvca_submit", "Submit", class = "btn-primary")
+    ),
+    tabItem(tabName = "umap",
+            selectInput("umap_effect_name","Select Contributing Effect Column Name(s)",
+                        choices = effect_name,multiple = F),
+            actionButton("umap_submit", "Submit", class = "btn-primary"),
+            plotOutput("draw_umap")
     ),
     tabItem(tabName = "elimination",
             h2("elimination tab content")
