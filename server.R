@@ -12,7 +12,9 @@ function(input, output,session) {
   })
   getMyd<-eventReactive(input$input_submit, {
     myd<-read.table(input$myd$datapath,sep = input$sep,header = input$header,encoding = "UTF-8",check.names = F)  
-    t(myd)
+    df2<-myd[-1]
+    rownames(df2)<-myd[,1]
+    df2<-t(df2)
     }
   )
   getSampleInfo<-eventReactive(input$input_submit, {
@@ -22,15 +24,16 @@ function(input, output,session) {
   getUmap<-eventReactive(input$umap_submit, {
       print("umap start")
       myd<-getMyd()
-      print(head(myd))
       myumap<-umap(myd)
       umap.layout<-data.frame(myumap$layout)
-      output$draw_umap<-renderPlot({
-        print(head(umap.layout))
-        plot(umap.layout)
-      })
+      
       return(umap.layout)
   }
   )
-
+  observeEvent(input$umap_effect_name,{
+    
+    output$draw_umap<-renderPlot({
+      plot(getUmap())
+    })
+  },ignoreNULL = T,ignoreInit =T)
 }
