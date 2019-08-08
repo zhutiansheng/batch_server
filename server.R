@@ -19,6 +19,8 @@ function(input, output,session) {
   )
   getSampleInfo<-eventReactive(input$input_submit, {
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
+    rownames(myd)<-myd[,1]
+    myd
     }
   )
   getUmap<-eventReactive(input$umap_submit, {
@@ -33,7 +35,38 @@ function(input, output,session) {
   observeEvent(input$umap_effect_name,{
     
     output$draw_umap<-renderPlot({
-      plot(getUmap())
+      mydf<-data.frame(getUmap())
+      mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
+      p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
+        theme(  #panel.grid.major = element_blank(),
+          #panel.grid.minor = element_blank(),
+          axis.line.x = element_line(color="black", size = 0.5),
+          axis.line.y = element_line(color="black", size = 0.5),
+          panel.background = element_blank())
+      return(p)
     })
   },ignoreNULL = T,ignoreInit =T)
+  
+  output$umap_ui <- renderUI({
+    downloadButton("umap_download", "Download", class = "btn-primary")
+  })
+  output$umap_download <- downloadHandler(
+    filename = function() {
+      paste("umap", Sys.Date(), ".pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file)
+      mydf<-data.frame(getUmap())
+      mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
+      p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
+        theme(  #panel.grid.major = element_blank(),
+          #panel.grid.minor = element_blank(),
+          axis.line.x = element_line(color="black", size = 0.5),
+          axis.line.y = element_line(color="black", size = 0.5),
+          panel.background = element_blank())
+      p
+      dev.off()
+      
+    }
+  )
 }

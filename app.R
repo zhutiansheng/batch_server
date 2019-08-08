@@ -72,7 +72,8 @@ body <- dashboardBody(
             selectInput("umap_effect_name","Select Contributing Effect Column Name(s)",
                         choices = effect_name,multiple = F),
             actionButton("umap_submit", "Submit", class = "btn-primary"),
-            plotOutput("draw_umap")
+            plotOutput("draw_umap"),
+            uiOutput("umap_ui")
     ),
     tabItem(tabName = "elimination",
             h2("elimination tab content")
