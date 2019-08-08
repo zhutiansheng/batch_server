@@ -32,9 +32,7 @@ function(input, output,session) {
       return(umap.layout)
   }
   )
-  observeEvent(input$umap_effect_name,{
-    
-    output$draw_umap<-renderPlot({
+  drawUmap<-eventReactive(input$umap_effect_name,{
       mydf<-data.frame(getUmap())
       mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
       p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
@@ -44,9 +42,11 @@ function(input, output,session) {
           axis.line.y = element_line(color="black", size = 0.5),
           panel.background = element_blank())
       return(p)
-    })
+    
   },ignoreNULL = T,ignoreInit =T)
-  
+  output$draw_umap<-renderPlot({
+    drawUmap()
+  })
   output$umap_ui <- renderUI({
     downloadButton("umap_download", "Download", class = "btn-primary")
   })
@@ -56,15 +56,7 @@ function(input, output,session) {
     },
     content = function(file) {
       pdf(file)
-      mydf<-data.frame(getUmap())
-      mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
-      p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
-        theme(  #panel.grid.major = element_blank(),
-          #panel.grid.minor = element_blank(),
-          axis.line.x = element_line(color="black", size = 0.5),
-          axis.line.y = element_line(color="black", size = 0.5),
-          panel.background = element_blank())
-      p
+      drawUmap()
       dev.off()
       
     }
