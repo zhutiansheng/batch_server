@@ -26,7 +26,8 @@ function(input, output,session) {
   getUmap<-eventReactive(input$umap_submit, {
       print("umap start")
       myd<-getMyd()
-      myumap<-umap(myd)
+      myd[is.na(myd)]<-0
+      myumap<-umap(myd,n_neighbors=input$n_neighbors)
       umap.layout<-data.frame(myumap$layout)
       
       return(umap.layout)
@@ -48,7 +49,8 @@ function(input, output,session) {
     drawUmap()
   })
   output$umap_ui <- renderUI({
-    downloadButton("umap_download", "Download", class = "btn-primary")
+    if(effect_name!="Please upload your sample information file")
+      downloadButton("umap_download", "Download", class = "btn-primary")
   })
   output$umap_download <- downloadHandler(
     filename = function() {
