@@ -1,5 +1,4 @@
-library(shiny)
-library(shinydashboard)
+
 sidebar <- dashboardSidebar(
   sidebarMenu(id="mysidebar",
     menuItem("Home", tabName = "home", icon = icon("home")),
@@ -66,7 +65,13 @@ body <- dashboardBody(
     tabItem(tabName = "pvca",
             selectInput("pvca_effect_name","Select Contributing Effect Column Name(s)",
                         choices = effect_name,multiple = T),
-            actionButton("pvca_submit", "Submit", class = "btn-primary")
+            sliderInput("pvca_threshold", "the percentile value of the minimum amount of the variabilities that the selected principal components need to explain",
+                        min = 0, max = 1,
+                        value = 0.7, step = 0.1),
+            actionButton("pvca_submit", "Submit", class = "btn-primary"),
+            plotOutput("draw_pvca"),
+            uiOutput("pvca_ui")
+            
     ),
     tabItem(tabName = "umap",
             sliderInput("n_neighbors", "number of nearest neighbors:",
@@ -105,13 +110,13 @@ body <- dashboardBody(
             uiOutput("umap_ui")
     ),
     tabItem(tabName = "elimination",
-            h2("elimination tab content")
+            downloadButton("cleanData_download", "Download", class = "btn-primary")
     )
   )
 )
 
 shiny::runApp(
-  #port = 80,
+  port = 80,
   display.mode = "auto",
   host = getOption("shiny.host", "0.0.0.0"),
   quiet = T

@@ -20,9 +20,35 @@ function(input, output,session) {
   getSampleInfo<-eventReactive(input$input_submit, {
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
     rownames(myd)<-myd[,1]
+    myd<-myd[-1]
     myd
     }
   )
+  #################################################################################
+  ###pvca
+  observeEvent(input$pvca_submit,{
+    pvcaobj<-pvcaBF(getMyd(),getSampleInfo(),input$pvca_effect_name,input$pvca_threshold)
+    output$draw_pvca<-renderPlot({
+      pvcaDraw(pvcaobj)
+    })
+    output$pvca_ui <- renderUI({
+      if(!is.null(pvcaobj))
+        downloadButton("pvca_download", "Download", class = "btn-primary")
+    })
+    output$umap_download <- downloadHandler(
+      filename = function() {
+        paste("pvca", Sys.Date(), ".pdf", sep = "")
+      },
+      content = function(file) {
+        pdf(file)
+        pvcaDraw(pvcaobj)
+        dev.off()
+        
+      }
+    )
+  },ignoreNULL = T,ignoreInit =T)
+  #################################################################################
+  ###umap
   getUmap<-eventReactive(input$umap_submit, {
       print("umap start")
       myd<-getMyd()
@@ -49,12 +75,25 @@ function(input, output,session) {
     drawUmap()
   })
   output$umap_ui <- renderUI({
-    if(effect_name!="Please upload your sample information file")
+    if(!is.null(drawUmap()))
       downloadButton("umap_download", "Download", class = "btn-primary")
   })
   output$umap_download <- downloadHandler(
     filename = function() {
       paste("umap", Sys.Date(), ".pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file)
+      drawUmap()
+      dev.off()
+      
+    }
+  )
+  #######################################################################33
+  ##remove batch effect
+  output$cleanData_download <- downloadHandler(
+    filename = function() {
+      paste("pvca", Sys.Date(), ".pdf", sep = "")
     },
     content = function(file) {
       pdf(file)
