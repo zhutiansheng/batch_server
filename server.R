@@ -4,7 +4,7 @@ function(input, output,session) {
     updateSelectInput(session, "pvca_effect_name",
                       choices = effect_name,
                       selected = NULL
-                      ) 
+    ) 
     updateSelectInput(session, "umap_effect_name",
                       choices = effect_name,
                       selected = NULL
@@ -15,60 +15,63 @@ function(input, output,session) {
     df2<-myd[-1]
     rownames(df2)<-myd[,1]
     df2<-t(df2)
-    }
+  }
   )
   getSampleInfo<-eventReactive(input$input_submit, {
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
     rownames(myd)<-myd[,1]
     myd<-myd[-1]
     myd
-    }
+  }
   )
   #################################################################################
   ###pvca
-  observeEvent(input$pvca_submit,{
+  getPVCA<-eventReactive(input$pvca_submit,{
+    print("pvca start")
     pvcaobj<-pvcaBF(getMyd(),getSampleInfo(),input$pvca_effect_name,input$pvca_threshold)
-    output$draw_pvca<-renderPlot({
-      pvcaDraw(pvcaobj)
-    })
-    output$pvca_ui <- renderUI({
-      if(!is.null(pvcaobj))
-        downloadButton("pvca_download", "Download", class = "btn-primary")
-    })
-    output$umap_download <- downloadHandler(
-      filename = function() {
-        paste("pvca", Sys.Date(), ".pdf", sep = "")
-      },
-      content = function(file) {
-        pdf(file)
-        pvcaDraw(pvcaobj)
-        dev.off()
-        
-      }
-    )
+    return(pvcaobj)
   },ignoreNULL = T,ignoreInit =T)
+  output$draw_pvca<-renderPlot({
+    pvcaDraw(getPVCA())
+  })
+  output$pvca_ui <- renderUI({
+    if(!is.null(getPVCA()))
+      downloadButton("pvca_download", "Download", class = "btn-primary")
+  })
+  output$pvca_download <- downloadHandler(
+    filename = function() {
+      paste("pvca", Sys.time(), ".pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file)
+      print(pvcaDraw(getPVCA()))
+      dev.off()
+      
+    }
+  )
   #################################################################################
   ###umap
   getUmap<-eventReactive(input$umap_submit, {
-      print("umap start")
-      myd<-getMyd()
-      myd[is.na(myd)]<-0
-      myumap<-umap(myd,n_neighbors=input$n_neighbors)
-      umap.layout<-data.frame(myumap$layout)
-      
-      return(umap.layout)
+    print("umap start")
+    myd<-getMyd()
+    myd[is.na(myd)]<-0
+    myumap<-umap(myd,n_neighbors=input$n_neighbors)
+    umap.layout<-data.frame(myumap$layout)
+    
+    return(umap.layout)
   }
   )
   drawUmap<-eventReactive(input$umap_effect_name,{
-      mydf<-data.frame(getUmap())
-      mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
-      p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
-        theme(  #panel.grid.major = element_blank(),
-          #panel.grid.minor = element_blank(),
-          axis.line.x = element_line(color="black", size = 0.5),
-          axis.line.y = element_line(color="black", size = 0.5),
-          panel.background = element_blank())
-      return(p)
+    mydf<-data.frame(getUmap())
+    mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
+    p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
+      theme(  #panel.grid.major = element_blank(),
+        #panel.grid.minor = element_blank(),
+        #axis.text.x = element_text(vjust = 1,angle = 45),
+        axis.line.x = element_line(color="black", size = 0.5),
+        axis.line.y = element_line(color="black", size = 0.5),
+        panel.background = element_blank())
+    return(p)
     
   },ignoreNULL = T,ignoreInit =T)
   output$draw_umap<-renderPlot({
@@ -84,7 +87,7 @@ function(input, output,session) {
     },
     content = function(file) {
       pdf(file)
-      drawUmap()
+      print(drawUmap())
       dev.off()
       
     }
@@ -96,10 +99,11 @@ function(input, output,session) {
       paste("pvca", Sys.Date(), ".pdf", sep = "")
     },
     content = function(file) {
+      print(dev.list())
       pdf(file)
-      drawUmap()
+      p<-ggplot(mpg,aes(cyl,hwy)) + geom_bar(stat="identity") 
+      plot(p)
       dev.off()
-      
     }
   )
 }
