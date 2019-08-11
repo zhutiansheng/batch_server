@@ -1,4 +1,4 @@
-
+source("global.R")
 sidebar <- dashboardSidebar(
   sidebarMenu(id="mysidebar",
     menuItem("Home", tabName = "home", icon = icon("home")),
@@ -124,7 +124,7 @@ body <- dashboardBody(
             selectInput("batch_effect_name","Select Known Batch Effect Column Name",
                         choices = effect_name,multiple = T),
             selectInput("adjust_variables","Select adjustment variable(s)",
-                        choices = "",multiple = T),
+                        choices = NULL,multiple = T),
             radioButtons("par.prior", "parametric estimate method",
                          choices = c(auto = "automatic",
                                      parameter = "parameter",
@@ -141,6 +141,7 @@ mean of the batch effects across batches (default adjusts the mean and variance)
                          choices = c(No = FALSE,
                                      Yes = TRUE),
                          selected = FALSE,inline = T),
+            actionButton("elimination_submit", "Elimination", class = "btn-primary"),
             
             downloadButton("cleanData_download", "Download", class = "btn-primary")
     )

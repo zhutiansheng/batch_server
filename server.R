@@ -127,6 +127,16 @@ function(input, output,session) {
   )
   #######################################################################33
   ##remove batch effect
+  eliminateBF<-eventReactive(input$elimination_submit,{
+    mod=NULL
+    if(!is.null(input$adjust_variables)){
+      adjust<-getSampleInfo()[input$adjust_variables]
+      mod<-model.matrix(~1,data = adjust)
+    }
+    combat(getMyd(), input$elimination, mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
+                      mean.only = input$mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
+    
+  },ignoreNULL = T,ignoreInit =T)
   output$cleanData_download <- downloadHandler(
     filename = function() {
       paste("pvca", Sys.Date(), ".pdf", sep = "")
