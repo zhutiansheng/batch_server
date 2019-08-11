@@ -63,15 +63,26 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "pvca",
+            
             selectInput("pvca_effect_name","Select Contributing Effect Column Name(s)",
                         choices = effect_name,multiple = T),
-            sliderInput("pvca_threshold", "the percentile value of the minimum amount of the variabilities that the selected principal components need to explain",
+            sliderInput("pvca_threshold", "Set the percentile value of the minimum amount of the variabilities that the selected principal components need to explain",
                         min = 0, max = 1,
                         value = 0.7, step = 0.1),
             actionButton("pvca_submit", "Submit", class = "btn-primary"),
+            tags$hr(),
+            tabsetPanel(
+              tabPanel(
+                "Barplot",
             plotOutput("draw_pvca"),
             uiOutput("pvca_ui")
-            
+              ),
+            tabPanel(
+              "Pieplot",
+              plotOutput("draw_pie"),
+              uiOutput("pvca_pie_ui")
+              )
+            )
     ),
     tabItem(tabName = "umap",
             sliderInput("n_neighbors", "number of nearest neighbors:",
@@ -110,6 +121,27 @@ body <- dashboardBody(
             uiOutput("umap_ui")
     ),
     tabItem(tabName = "elimination",
+            selectInput("batch_effect_name","Select Known Batch Effect Column Name",
+                        choices = effect_name,multiple = T),
+            selectInput("adjust_variables","Select adjustment variable(s)",
+                        choices = "",multiple = T),
+            radioButtons("par.prior", "parametric estimate method",
+                         choices = c(auto = "automatic",
+                                     parameter = "parameter",
+                                     noparameter = "noparameter"),
+                         selected = "automatic",inline = T),
+            radioButtons("fit.method", "fitness method",
+                         choices = c("maximum likelihood" = "mle",
+                                     "moment matching" =  "mme",
+                                     "quantile matching" = "qme",
+                                     "maximizing goodness-of-fit estimation" = "mge"),
+                         selected = "mle",inline = T),
+            radioButtons("mean.only", "Only adjusts the
+mean of the batch effects across batches (default adjusts the mean and variance)",
+                         choices = c(No = FALSE,
+                                     Yes = TRUE),
+                         selected = FALSE,inline = T),
+            
             downloadButton("cleanData_download", "Download", class = "btn-primary")
     )
   )

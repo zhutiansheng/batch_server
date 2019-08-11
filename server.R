@@ -1,6 +1,12 @@
 function(input, output,session) {
   observe({
     effect_name<-colnames(getSampleInfo())
+    adjust_variable<-""
+    if(!is.null(input$batch_effect_name)){
+      adjust_variable<-effect_name[-which(effect_name==input$batch_effect_name)]
+      
+    }
+      
     updateSelectInput(session, "pvca_effect_name",
                       choices = effect_name,
                       selected = NULL
@@ -9,20 +15,28 @@ function(input, output,session) {
                       choices = effect_name,
                       selected = NULL
     ) 
+    updateSelectInput(session, "batch_effect_name",
+                      choices = effect_name,
+                      selected = NULL
+    ) 
+    updateSelectInput(session, "adjust_variables",
+                      choices = adjust_variable,
+                      selected = NULL
+    )
   })
   getMyd<-eventReactive(input$input_submit, {
     myd<-read.table(input$myd$datapath,sep = input$sep,header = input$header,encoding = "UTF-8",check.names = F)  
     df2<-myd[-1]
     rownames(df2)<-myd[,1]
     df2<-t(df2)
-  }
+  },ignoreNULL = T,ignoreInit =T
   )
   getSampleInfo<-eventReactive(input$input_submit, {
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
     rownames(myd)<-myd[,1]
     myd<-myd[-1]
     myd
-  }
+  },ignoreNULL = T,ignoreInit =T
   )
   #################################################################################
   ###pvca
@@ -40,11 +54,30 @@ function(input, output,session) {
   })
   output$pvca_download <- downloadHandler(
     filename = function() {
-      paste("pvca", Sys.time(), ".pdf", sep = "")
+      paste("pvca_barplot", Sys.time(), ".pdf", sep = "")
     },
     content = function(file) {
       pdf(file)
       print(pvcaDraw(getPVCA()))
+      dev.off()
+      
+    }
+  )
+  ##piePlot
+  output$draw_pie<-renderPlot({
+    pieDraw(getPVCA())
+  })
+  output$pvca_pie_ui <- renderUI({
+    if(!is.null(getPVCA()))
+      downloadButton("pvca_pie_download", "Download", class = "btn-primary")
+  })
+  output$pvca_pie_download <- downloadHandler(
+    filename = function() {
+      paste("pvca_pie", Sys.time(), ".pdf", sep = "")
+    },
+    content = function(file) {
+      pdf(file)
+      print(pieDraw(getPVCA()))
       dev.off()
       
     }
@@ -59,7 +92,7 @@ function(input, output,session) {
     umap.layout<-data.frame(myumap$layout)
     
     return(umap.layout)
-  }
+  },ignoreNULL = T,ignoreInit =T
   )
   drawUmap<-eventReactive(input$umap_effect_name,{
     mydf<-data.frame(getUmap())
