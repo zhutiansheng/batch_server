@@ -166,7 +166,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
             return(norm.test & ig.test)
           }, BPPARAM = BPPARAM)
   )
-
+  names(passTest)<-levels(batch)
   addition_data<-list(gamm.hat=gamma.hat,delta.hat=delta.hat,passTest=passTest)
   
   
