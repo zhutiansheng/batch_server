@@ -130,23 +130,52 @@ function(input, output,session) {
   eliminateBF<-eventReactive(input$elimination_submit,{
     mod=NULL
     if(!is.null(input$adjust_variables)){
-      adjust<-getSampleInfo()[input$adjust_variables]
-      mod<-model.matrix(~1,data = adjust)
+      pheno<-getSampleInfo()[input$adjust_variables]
+      adjust_f<-paste0("as.factor(",input$adjust_variables,")",collapse = "+")
+      mod<-model.matrix(eval(parse(text=paste('~', adjust_f))),data=pheno)
     }
-    combat(getMyd(), input$elimination, mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
+    batch<-getSampleInfo()[input$elimination]
+    
+    combat(getMyd(),batch , mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
                       mean.only = input$mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
     
   },ignoreNULL = T,ignoreInit =T)
+  
+  output$combat_log<-renderPrint({
+    batch_passTest<-eliminateBF()$additiondata$passTest
+    if(length(eliminateBF())>1)
+      return(NULL)
+    else {
+      batch<-as.factor(getSampleInfo()[input$elimination])
+      me<-paste0("Sucessfully adjusted ",nlevels(batch)," batches, ",
+                 length(input$adjust_variables)," covariate variable(s). Parameter estimate batche(s): ",
+                 names(batch_passTest)[batch_passTest==TRUE],". And noparameter estimate batche(s): ",
+                 names(batch_passTest)[batch_passTest==FALSE])
+      return(me)
+    }
+    
+    })
+  output$combat_ui <- renderUI({
+    if(length(eliminateBF())>1){
+      tagList(
+        downloadButton("cleanData_download", "getResult", class = "btn-primary"),
+        selectInput("batch_para_name","Select batch level to show whether it is reasonable",
+                    choices = names(eliminateBF()$additiondata$passTest),
+                    selected = NULL),
+        plotOutput("prior_plot")
+      )
+    }
+  })
+  output$prior_plot<-renderPlot({
+    drawPrior(eliminateBF()$additiondata,input$batch_para_name)
+  })
+  
   output$cleanData_download <- downloadHandler(
     filename = function() {
-      paste("pvca", Sys.Date(), ".pdf", sep = "")
+      paste("pvca", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      print(dev.list())
-      pdf(file)
-      p<-ggplot(mpg,aes(cyl,hwy)) + geom_bar(stat="identity") 
-      plot(p)
-      dev.off()
+      write.csv(eliminateBF()$bayesdata,file,row.names = F,quote = F,na="")
     }
   )
 }

@@ -142,8 +142,8 @@ mean of the batch effects across batches (default adjusts the mean and variance)
                                      Yes = TRUE),
                          selected = FALSE,inline = T),
             actionButton("elimination_submit", "Elimination", class = "btn-primary"),
-            
-            downloadButton("cleanData_download", "Download", class = "btn-primary")
+            verbatimTextOutput("combat_log"),
+            uiOutput("combat_ui")
     )
   )
 )

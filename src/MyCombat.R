@@ -5,12 +5,14 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
     message("Using the 'mean only' version of ComBat")
   }
   if (length(dim(batch)) > 1) {
+    return("This version of ComBat only allows one batch variable")
     stop("This version of ComBat only allows one batch variable")
   }
   batch <- as.factor(batch)
   batchmod <- model.matrix(~-1 + batch)
   if (!is.null(ref.batch)) {
     if (!(ref.batch %in% levels(batch))) {
+      return("reference level ref.batch is not one of the levels of the batch variable")
       stop("reference level ref.batch is not one of the levels of the batch variable")
     }
     cat("Using batch =", ref.batch, "as a reference batch (this batch won't change)\n")
@@ -42,14 +44,17 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
           "covariate(s) or covariate level(s)")
   if (qr(design)$rank < ncol(design)) {
     if (ncol(design) == (n.batch + 1)) {
+      return("The covariate is confounded with batch! Remove the covariate and rerun ComBat")
       stop("The covariate is confounded with batch! Remove the covariate and rerun ComBat")
     }
     if (ncol(design) > (n.batch + 1)) {
       if ((qr(design[, -c(1:n.batch)])$rank < ncol(design[, 
                                                           -c(1:n.batch)]))) {
+        return("The covariates are confounded! Please remove one or more of the covariates so the design is not confounded")
         stop("The covariates are confounded! Please remove one or more of the covariates so the design is not confounded")
       }
       else {
+        return("At least one covariate is confounded with batch! Please remove confounded covariates and rerun ComBat")
         stop("At least one covariate is confounded with batch! Please remove confounded covariates and rerun ComBat")
       }
     }
