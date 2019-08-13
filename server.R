@@ -1,11 +1,11 @@
 function(input, output,session) {
   observe({
     effect_name<-colnames(getSampleInfo())
-    adjust_variable<-""
-    if(!is.null(input$batch_effect_name)){
-      adjust_variable<-effect_name[-which(effect_name==input$batch_effect_name)]
-      
-    }
+    adjust_variable<-NULL
+    # if(!is.null(input$batch_effect_name)){
+    #   adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
+    #   
+    # }
       
     updateSelectInput(session, "pvca_effect_name",
                       choices = effect_name,
@@ -25,28 +25,53 @@ function(input, output,session) {
     )
   })
   getMyd<-eventReactive(input$input_submit, {
+    withProgress(message = 'Read data in progress',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
+    print("data read")               
     myd<-read.table(input$myd$datapath,sep = input$sep,header = input$header,encoding = "UTF-8",check.names = F)  
+    print(input$myd$datapath)
     df2<-myd[-1]
     rownames(df2)<-myd[,1]
     df2<-t(df2)
+    incProgress(9/10,"Data read completed")
+                 })
+    print(head(df2))
+    return(df2)
   },ignoreNULL = T,ignoreInit =T
   )
   getSampleInfo<-eventReactive(input$input_submit, {
+    withProgress(message = 'Read sample in progress',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
     rownames(myd)<-myd[,1]
     myd<-myd[-1]
-    myd
+    incProgress(9/10,"Sample read completed")
+                 })
+    return(myd)
   },ignoreNULL = T,ignoreInit =T
   )
   #################################################################################
   ###pvca
   getPVCA<-eventReactive(input$pvca_submit,{
+    withProgress(message = 'Read sample in progress',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
     print("pvca start")
     pvcaobj<-pvcaBF(getMyd(),getSampleInfo(),input$pvca_effect_name,input$pvca_threshold)
+    incProgress(9/10,"Prepare to return")
+                 })
+    print("pvca return")
     return(pvcaobj)
   },ignoreNULL = T,ignoreInit =T)
   output$draw_pvca<-renderPlot({
+    withProgress(message = 'Read sample in progress',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
     pvcaDraw(getPVCA())
+    incProgress(9/10,"PVCA plot completed")
+  })
   })
   output$pvca_ui <- renderUI({
     if(!is.null(getPVCA()))

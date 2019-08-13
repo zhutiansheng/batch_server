@@ -1,10 +1,14 @@
 pvcaBF<-function(df,sampleInfo,batch_effect,threshold){
+  print("pvcaBF start")
+  print(head(df))
   df<-data.matrix(t(df))
+  print(head(df))
   phenoData <- new("AnnotatedDataFrame",data=sampleInfo)
   myExpressionSet <- ExpressionSet(assayData=df,
                                    phenoData=phenoData
   )
   pvcaObj <- pvcaBatchAssess (myExpressionSet, batch_effect, threshold)
+  print("pvcaBF end")
   return(pvcaObj)
 }
 pvcaDraw<-function(pvcaobj){

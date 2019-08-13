@@ -122,7 +122,7 @@ body <- dashboardBody(
     ),
     tabItem(tabName = "elimination",
             selectInput("batch_effect_name","Select Known Batch Effect Column Name",
-                        choices = effect_name,multiple = T),
+                        choices = NULL,multiple = F),
             selectInput("adjust_variables","Select adjustment variable(s)",
                         choices = NULL,multiple = T),
             radioButtons("par.prior", "parametric estimate method",
