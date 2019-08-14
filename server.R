@@ -2,10 +2,10 @@ function(input, output,session) {
   observe({
     effect_name<-colnames(getSampleInfo())
     adjust_variable<-NULL
-    # if(!is.null(input$batch_effect_name)){
-    #   adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
-    #   
-    # }
+    if(!is.null(input$batch_effect_name)){
+      adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
+
+    }
       
     updateSelectInput(session, "pvca_effect_name",
                       choices = effect_name,
@@ -24,6 +24,15 @@ function(input, output,session) {
                       selected = NULL
     )
   })
+  
+  output$upload_note <- renderText({
+    
+    if(is.null(getMyd()))
+      "Please upload data first"
+    else paste("Sucessfully uploaded data dimension is",paste(dim(getMyd()),collapse = "×")," and sample dimension is",paste(dim(getSampleInfo()),collapse = "×"))
+    
+  })
+  
   getMyd<-eventReactive(input$input_submit, {
     withProgress(message = 'Read data in progress',
                  detail = 'This may take a while...', value = 0, {
@@ -36,11 +45,11 @@ function(input, output,session) {
     df2<-t(df2)
     incProgress(9/10,"Data read completed")
                  })
-    print(head(df2))
     return(df2)
   },ignoreNULL = T,ignoreInit =T
   )
   getSampleInfo<-eventReactive(input$input_submit, {
+    print("Read sample")
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
