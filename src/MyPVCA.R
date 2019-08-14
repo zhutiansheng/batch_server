@@ -1,8 +1,6 @@
 pvcaBF<-function(df,sampleInfo,batch_effect,threshold){
   print("pvcaBF start")
-  print(head(df))
   df<-data.matrix(t(df))
-  print(head(df))
   phenoData <- new("AnnotatedDataFrame",data=sampleInfo)
   myExpressionSet <- ExpressionSet(assayData=df,
                                    phenoData=phenoData
@@ -28,8 +26,8 @@ pieDraw<-function(pvcaobj){
   df<-data.frame(cbind(dat,Source))
   df$dat<-as.numeric(df$dat)
   df$percent<-round(df$dat/sum(df$dat)*100,3)
-  df$Source<-paste0(Source," (",df$percent,")")
-  p<-ggplot(df, aes(x = "", weight =percent , fill = label)) +
+  df$Source<-paste0(Source," (",df$percent,"%)")
+  p<-ggplot(df, aes(x = "", weight =percent , fill = Source)) +
     geom_bar(width = 1) +
     coord_polar(theta = "y") + xlab('') + ylab('') +
     #geom_text(aes(x = 1.3, y = Data, label = Sample))+

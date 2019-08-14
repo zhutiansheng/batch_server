@@ -1,11 +1,11 @@
 function(input, output,session) {
   observe({
     effect_name<-colnames(getSampleInfo())
-    adjust_variable<-NULL
-    if(!is.null(input$batch_effect_name)){
-      adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
-
-    }
+    adjust_variable<-effect_name
+    # if(!is.null(input$batch_effect_name)){
+    #   adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
+    # 
+    # }
       
     updateSelectInput(session, "pvca_effect_name",
                       choices = effect_name,
@@ -29,7 +29,7 @@ function(input, output,session) {
     
     if(is.null(getMyd()))
       "Please upload data first"
-    else paste("Sucessfully uploaded data dimension is",paste(dim(getMyd()),collapse = "×")," and sample dimension is",paste(dim(getSampleInfo()),collapse = "×"))
+    else paste("Sucessfully uploaded data dimension is",paste(dim(getMyd()),collapse = " × "),"and sample dimension is",paste(dim(getSampleInfo()),collapse = " × "))
     
   })
   
@@ -78,7 +78,7 @@ function(input, output,session) {
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
-    pvcaDraw(getPVCA())
+    print(pvcaDraw(getPVCA()))
     incProgress(9/10,"PVCA plot completed")
   })
   })
@@ -119,15 +119,24 @@ function(input, output,session) {
   #################################################################################
   ###umap
   getUmap<-eventReactive(input$umap_submit, {
+    withProgress(message = 'Calculating now',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
     print("umap start")
     myd<-getMyd()
     myd[is.na(myd)]<-0
     myumap<-umap(myd,n_neighbors=input$n_neighbors)
     umap.layout<-data.frame(myumap$layout)
-    
+    incProgress(9/10,"Finished!")
+    })           
     return(umap.layout)
   },ignoreNULL = T,ignoreInit =T
   )
+  output$umap_note <- renderText({
+    if(!is.null(getUmap()))
+    "UMAP calculation is done. Select following to (re)draw UMAP"
+  })
+  
   drawUmap<-eventReactive(input$umap_effect_name,{
     mydf<-data.frame(getUmap())
     mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
@@ -162,29 +171,38 @@ function(input, output,session) {
   #######################################################################33
   ##remove batch effect
   eliminateBF<-eventReactive(input$elimination_submit,{
+    withProgress(message = 'Calculating now',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
+    print("Combat start")
     mod=NULL
     if(!is.null(input$adjust_variables)){
       pheno<-getSampleInfo()[input$adjust_variables]
       adjust_f<-paste0("as.factor(",input$adjust_variables,")",collapse = "+")
       mod<-model.matrix(eval(parse(text=paste('~', adjust_f))),data=pheno)
     }
-    batch<-getSampleInfo()[input$elimination]
-    
-    combat(getMyd(),batch , mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
+
+    batch<-getSampleInfo()[,input$batch_effect_name]
+    dat<-t(getMyd())
+    dat<-as.matrix(dat)
+    result<-combat(dat,batch , mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
                       mean.only = input$mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
-    
+    incProgress(9/10,"Completed")
+                 })
+    return(result)
   },ignoreNULL = T,ignoreInit =T)
   
-  output$combat_log<-renderPrint({
-    batch_passTest<-eliminateBF()$additiondata$passTest
-    if(length(eliminateBF())>1)
-      return(NULL)
+  output$combat_log<-renderText({
+    print(str(eliminateBF()))
+    if(length(eliminateBF())<1)
+      eliminateBF()
     else {
-      batch<-as.factor(getSampleInfo()[input$elimination])
+      batch_passTest<-eliminateBF()$additiondata$passTest
+      batch<-as.factor(getSampleInfo()[,input$elimination])
       me<-paste0("Sucessfully adjusted ",nlevels(batch)," batches, ",
-                 length(input$adjust_variables)," covariate variable(s). Parameter estimate batche(s): ",
-                 names(batch_passTest)[batch_passTest==TRUE],". And noparameter estimate batche(s): ",
-                 names(batch_passTest)[batch_passTest==FALSE])
+                 length(input$adjust_variables)," covariate variable(s). Parameter estimated batche(s): ",
+                 paste(names(batch_passTest)[batch_passTest==TRUE],collapse = " "),". And noparameter estimated batche(s): ",
+                 paste(names(batch_passTest)[batch_passTest==FALSE],collapse = " "))
       return(me)
     }
     
@@ -206,7 +224,7 @@ function(input, output,session) {
   
   output$cleanData_download <- downloadHandler(
     filename = function() {
-      paste("pvca", Sys.Date(), ".csv", sep = "")
+      paste("BatchFree", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
       write.csv(eliminateBF()$bayesdata,file,row.names = F,quote = F,na="")

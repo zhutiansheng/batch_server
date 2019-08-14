@@ -13,7 +13,7 @@ batch = pheno$batch
 mod = model.matrix(~ as.factor(cancer), data = pheno)
 dat = edata
 batch = batch
-mod = NULL
+#mod = NULL
 par.prior = TRUE
 prior.plots = T
 mean.only = FALSE
