@@ -59,7 +59,8 @@ body <- dashboardBody(
             
             # Horizontal line ----
             tags$hr(),
-            actionButton("input_submit", "Submit", class = "btn-primary")
+            actionButton("input_submit", "Submit", class = "btn-primary"),
+            verbatimTextOutput("upload_note")
     ),
     
     tabItem(tabName = "pvca",
