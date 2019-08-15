@@ -1,5 +1,3 @@
-priorData<-result$additiondata
-batchName="2"
 drawPrior<-function(priorData,batchName="2") {
   gamma.hat<-priorData$gamma.hat
   delta.hat<-priorData$delta.hat
