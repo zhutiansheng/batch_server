@@ -172,7 +172,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
           }, BPPARAM = BPPARAM)
   )
   names(passTest)<-levels(batch)
-  addition_data<-list(gamm.hat=gamma.hat,delta.hat=delta.hat,passTest=passTest)
+  addition_data<-list(gamma.hat=gamma.hat,delta.hat=delta.hat,passTest=passTest)
   
   gamma.star <- delta.star <- matrix(NA, nrow = n.batch, ncol = nrow(s.data))
   if (sum(passTest==TRUE)>0) {
