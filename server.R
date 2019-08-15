@@ -150,8 +150,8 @@ function(input, output,session) {
     return(p)
     
   },ignoreNULL = T,ignoreInit =T)
-  output$draw_umap<-renderPlot({
-    drawUmap()
+  output$draw_umap<-renderPlotly({
+    plotly_build(drawUmap())
   })
   output$umap_ui <- renderUI({
     if(!is.null(drawUmap()))

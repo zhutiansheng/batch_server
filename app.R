@@ -10,8 +10,8 @@ sidebar <- dashboardSidebar(
              menuSubItem("UMAP", tabName = "umap", icon = icon("angle-left"))
              ),
     menuItem("Elimination", icon = icon("line-chart"), tabName = "elimination",
-             badgeLabel = "remove", badgeColor = "blue"),
-    menuItem("ReadMe", tabName = "readme", icon=icon("mortar-board")),
+             badgeLabel = "combat", badgeColor = "blue"),
+    menuItem("ReadMe", tabName = "readme",badgeLabel = "help", badgeColor = "red", icon=icon("mortar-board")),
     menuItem("About", tabName = "about", icon = icon("question"))
   )
 )
@@ -118,7 +118,7 @@ body <- dashboardBody(
             tags$hr(),
             selectInput("umap_effect_name","Select Contributing Effect Column Name(s)",
                         choices = effect_name,multiple = F),
-            plotOutput("draw_umap"),
+            plotlyOutput("draw_umap"),
             uiOutput("umap_ui")
     ),
     tabItem(tabName = "elimination",

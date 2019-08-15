@@ -11,6 +11,7 @@ library(fitdistrplus)
 library(extraDistr)
 library(umap)
 library(ggplot2)
+library(plotly)
 library(Biobase)
 library(pvca)
 #import user defined functions
