@@ -17,7 +17,7 @@ library(pvca)
 source('src/MyCombat.R')
 environment(combat) <- asNamespace('sva')
 source('src/MyPVCA.R')
-source('src/MyPrior.R')
+source('src/MyPriorDraw.R')
 environment(drawPrior) <- asNamespace('sva')
 
 effect_name="Please upload your sample information file"
