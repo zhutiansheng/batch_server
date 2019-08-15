@@ -200,8 +200,8 @@ function(input, output,session) {
       batch_passTest<-eliminateBF()$additiondata$passTest
       batch<-as.factor(getSampleInfo()[,input$elimination])
       me<-paste0("Sucessfully adjusted ",nlevels(batch)," batches, ",
-                 length(input$adjust_variables)," covariate variable(s). Parameter estimated batche(s): ",
-                 paste(names(batch_passTest)[batch_passTest==TRUE],collapse = " "),". And noparameter estimated batche(s): ",
+                 length(input$adjust_variables)," covariate variable(s). Parameter estimated batch(es): ",
+                 paste(names(batch_passTest)[batch_passTest==TRUE],collapse = " "),". And noparameter estimated batch(es): ",
                  paste(names(batch_passTest)[batch_passTest==FALSE],collapse = " "))
       return(me)
     }
@@ -214,20 +214,23 @@ function(input, output,session) {
         selectInput("batch_para_name","Select batch level to show whether it is reasonable",
                     choices = names(eliminateBF()$additiondata$passTest),
                     selected = NULL),
-        plotOutput("prior_plot")
+        plotOutput("prior_plot"),
+        verbatimTextOutput("prior_plot_note")
       )
     }
   })
   output$prior_plot<-renderPlot({
     drawPrior(eliminateBF()$additiondata,input$batch_para_name)
   })
-  
+  output$prior_plot_note<-renderText({
+    "Note: blue lines/points means a kernel estimate of the empirical batch effect density while red as the parametric estimate."
+  })
   output$cleanData_download <- downloadHandler(
     filename = function() {
       paste("BatchFree", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      write.csv(eliminateBF()$bayesdata,file,row.names = F,quote = F,na="")
+      write.csv(eliminateBF()$bayesdata,file,row.names = T,quote = F,na="")
     }
   )
 }
