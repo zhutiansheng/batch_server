@@ -14,11 +14,12 @@ library(ggplot2)
 library(plotly)
 library(Biobase)
 library(pvca)
+library(randomForest)
 #import user defined functions
 source('src/MyCombat.R')
 environment(combat) <- asNamespace('sva')
 source('src/MyPVCA.R')
 source('src/MyPriorDraw.R')
 environment(drawPrior) <- asNamespace('sva')
-
+source("src/MyRandomForest.R")
 effect_name="Please upload your sample information file"

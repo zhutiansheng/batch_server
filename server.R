@@ -23,6 +23,10 @@ function(input, output,session) {
                       choices = adjust_variable,
                       selected = NULL
     )
+    updateSelectInput(session, "batch_effect_name_rf",
+                      choices = effect_name,
+                      selected = NULL
+    )
   })
   
   output$upload_note <- renderText({
@@ -231,6 +235,58 @@ function(input, output,session) {
     },
     content = function(file) {
       write.csv(eliminateBF()$bayesdata,file,row.names = T,quote = F,na="")
+    }
+  )
+  #######################################################################33
+  ##remove top n batch effect related feature
+  getImpFeature<-eventReactive(input$rf_submit,{
+    withProgress(message = 'Calculating now',
+                 detail = 'This may take a while...', value = 0, {
+                   incProgress(1/10)
+                   print("random forest start")
+                   label<-getSampleInfo()[,input$batch_effect_name_rf]
+                   dat<-data.frame(getMyd())
+                   #print(head(dat))
+                   dat$label<-as.factor(label)
+                   result<-myRF(dat,input$ntree,input$nodesize)
+                   incProgress(9/10,"Completed")
+                 })
+    if(length(result)<1)
+      return("Something wrong, please check your data!")
+    return(result)
+  },ignoreNULL = T,ignoreInit =T)
+  
+  output$rf_log<-renderText({
+    if(length(getImpFeature())<1)
+      getImpFeature()
+    else {
+      return(paste("Filter out top ",input$topN," variables: ",paste(getImpFeature()$features[1:input$topN],collapse = ",")))
+    }
+    
+  })
+  output$rf_ui <- renderUI({
+    if(length(getImpFeature())>1){
+      tagList(
+        downloadButton("cleanData_download_rf", "getResult", class = "btn-primary"),
+        plotOutput("model_plot_rf"),
+        verbatimTextOutput("rf_plot_note")
+      )
+    }
+  })
+  output$model_plot_rf<-renderPlot({
+    plot(getImpFeature()$mod,main="")
+  })
+  output$rf_plot_note<-renderText({
+    "Note: Random Forest process graph"
+  })
+  output$cleanData_download_rf <- downloadHandler(
+    filename = function() {
+      paste("SubSet", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      features_remain<-setdiff(rownames(getMyd()),getImpFeature()$features[1:input$topN])
+      
+      write.csv(getMyd()[features_remain,],file,row.names = T,quote = F,na="")
     }
   )
 }

@@ -10,7 +10,10 @@ sidebar <- dashboardSidebar(
              menuSubItem("UMAP", tabName = "umap", icon = icon("angle-left"))
              ),
     menuItem("Elimination", icon = icon("line-chart"), tabName = "elimination",
-             badgeLabel = "combat", badgeColor = "blue"),
+             badgeColor = "blue",
+             menuSubItem("ComBat", tabName = "combat", icon = icon("angle-left")),
+             menuSubItem("RandomForest", tabName = "rf", icon = icon("angle-left"))
+             ),
     menuItem("ReadMe", tabName = "readme",badgeLabel = "help", badgeColor = "red", icon=icon("mortar-board")),
     menuItem("About", tabName = "about", icon = icon("question"))
   )
@@ -121,7 +124,10 @@ body <- dashboardBody(
             plotlyOutput("draw_umap"),
             uiOutput("umap_ui")
     ),
-    tabItem(tabName = "elimination",
+    tabItem(tabName = "combat",
+            h3("The ComBat function adjusts for known batches using an empirical Bayesian
+framework. So known batch variable is required in your dataset."),
+            hr(),
             selectInput("batch_effect_name","Select Known Batch Effect Column Name",
                         choices = NULL,multiple = F),
             selectInput("adjust_variables","Select adjustment variable(s)",
@@ -145,6 +151,20 @@ mean of the batch effects across batches (default adjusts the mean and variance)
             actionButton("elimination_submit", "Elimination", class = "btn-primary"),
             verbatimTextOutput("combat_log"),
             uiOutput("combat_ui")
+    ),
+    tabItem(tabName = "rf",
+            h3("Remove most importances batch related variables using Random Forest "),
+            selectInput("batch_effect_name_rf","Select Known Batch Effect Column Name",
+                        choices = NULL,multiple = F),
+            numericInput("ntree", "Number of trees to grow", 500,
+                         1, 5000, 1),
+            numericInput("nodesize", "Minimum size of terminal nodes", 5,
+                         1, 500, 1),
+            numericInput("topN", "Number of top effect batch related variables to delete", 5,
+                         1, 500, 1),
+            actionButton("rf_submit", "Submit", class = "btn-primary"),
+            verbatimTextOutput("rf_log"),
+            uiOutput("rf_ui")
     )
   )
 )
