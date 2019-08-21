@@ -88,7 +88,9 @@ body <- dashboardBody(
               )
             )
     ),
-    tabItem(tabName = "umap",
+    tabItem(tabName = "umap",            
+            h3("Description:"),
+
             sliderInput("n_neighbors", "number of nearest neighbors:",
                         min = 1, max = 100,
                         value = 15),
@@ -125,7 +127,8 @@ body <- dashboardBody(
             uiOutput("umap_ui")
     ),
     tabItem(tabName = "combat",
-            h3("The ComBat function adjusts for known batches using an empirical Bayesian
+            h3("Description:"),
+            h4("The ComBat function adjusts for known batches using an empirical Bayesian
 framework. So known batch variable is required in your dataset."),
             hr(),
             selectInput("batch_effect_name","Select Known Batch Effect Column Name",
@@ -153,7 +156,9 @@ mean of the batch effects across batches (default adjusts the mean and variance)
             uiOutput("combat_ui")
     ),
     tabItem(tabName = "rf",
-            h3("Remove most importances batch related variables using Random Forest "),
+            h3("Description:"),
+            h4("Remove most importances batch related variables using Random Forest "),
+            hr(),
             selectInput("batch_effect_name_rf","Select Known Batch Effect Column Name",
                         choices = NULL,multiple = F),
             numericInput("ntree", "Number of trees to grow", 500,
@@ -165,7 +170,12 @@ mean of the batch effects across batches (default adjusts the mean and variance)
             actionButton("rf_submit", "Submit", class = "btn-primary"),
             verbatimTextOutput("rf_log"),
             uiOutput("rf_ui")
-    )
+    ),
+    tabItem(tabName = "readme",
+            h3("Test Data Download"),
+            downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
+            downloadButton("sampleData_download", "sampleInfo", class = "btn-primary")
+            )
   )
 )
 options(shiny.reactlog = TRUE)

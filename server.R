@@ -289,4 +289,29 @@ function(input, output,session) {
       write.csv(getMyd()[features_remain,],file,row.names = T,quote = F,na="")
     }
   )
+  ######test data download
+  output$testData_download <- downloadHandler(
+    filename = function() {
+      "testDataMatrix.csv"
+    },
+    content = function(file) {
+      data(bladderdata)
+      dat <- bladderEset
+      #pheno = pData(dat)
+      edata = exprs(dat)
+      write.csv(edata,file,row.names = T,quote = F,na="")
+    }
+  )
+  output$sampleData_download <- downloadHandler(
+    filename = function() {
+      "sampleInformation.csv"
+    },
+    content = function(file) {
+      data(bladderdata)
+      dat <- bladderEset
+      pheno = pData(dat)
+      #edata = exprs(dat)
+      write.csv(pheno,file,row.names = F,quote = F,na="")
+    }
+  )
 }

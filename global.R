@@ -15,6 +15,7 @@ library(plotly)
 library(Biobase)
 library(pvca)
 library(randomForest)
+library(bladderbatch)#testdata
 #import user defined functions
 source('src/MyCombat.R')
 environment(combat) <- asNamespace('sva')
