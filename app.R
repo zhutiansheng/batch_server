@@ -173,8 +173,19 @@ mean of the batch effects across batches (default adjusts the mean and variance)
     ),
     tabItem(tabName = "readme",
             h3("Test Data Download"),
+            h5("There are two type of files users should prepare in order to use BatchServer:
+data matrix file and sample information file. The format of these two files can be tab-delimited or space-separated .txt file or comma-delimited .csv file.
+Here is an example of a data file and sample information file: "),
+            h5("Sample information file:
+The first column must contain the names of the samples (column names) as in your data file. The columns after sample name include batch and covariate name. Note since ComBat only deals with categorical covariates, numerical covariates have not been supported by BatchEffect currently.
+"),            
+            downloadButton("sampleData_download", "sampleInfo", class = "btn-primary"),
+            h5("Data file:
+The first column must contain the features (such as, protein or gene name). The first row must contain all sample name as exectly as in your sample information file.
+"),            
             downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
-            downloadButton("sampleData_download", "sampleInfo", class = "btn-primary")
+
+            h5("Parameter descriptions:")
             )
   )
 )
