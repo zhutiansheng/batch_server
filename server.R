@@ -311,7 +311,7 @@ function(input, output,session) {
       dat <- bladderEset
       pheno = pData(dat)
       #edata = exprs(dat)
-      write.csv(pheno,file,row.names = F,quote = F,na="")
+      write.csv(pheno,file,row.names = T,quote = F,na="")
     }
   )
 }

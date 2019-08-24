@@ -5,7 +5,6 @@ set.seed(12345)
 #load library
 library(shiny)
 library(shinydashboard)
-library(shinydashboard)
 library(sva)
 library(fitdistrplus)
 library(extraDistr)
