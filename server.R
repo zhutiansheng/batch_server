@@ -189,7 +189,7 @@ function(input, output,session) {
     batch<-getSampleInfo()[,input$batch_effect_name]
     dat<-t(getMyd())
     dat<-as.matrix(dat)
-    result<-combat(dat,batch , mod = mod, par.prior=input$par.prior, fit.method=input$fit.method,  
+    result<-combat(dat,batch , mod = mod, par.prior=input$par.prior, fit.method="mle",  
                       mean.only = input$mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
     incProgress(9/10,"Completed")
                  })
@@ -296,7 +296,7 @@ function(input, output,session) {
     },
     content = function(file) {
       data(bladderdata)
-      dat <- bladderEset
+      dat <- bladderEset[1:100,]
       #pheno = pData(dat)
       edata = exprs(dat)
       write.csv(edata,file,row.names = T,quote = F,na="")
