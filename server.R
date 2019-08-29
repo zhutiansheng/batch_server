@@ -202,7 +202,7 @@ function(input, output,session) {
       eliminateBF()
     else {
       batch_passTest<-eliminateBF()$additiondata$passTest
-      batch<-as.factor(getSampleInfo()[,input$elimination])
+      batch<-as.factor(getSampleInfo()[,input$batch_effect_name])
       me<-paste0("Sucessfully adjusted ",nlevels(batch)," batches, ",
                  length(input$adjust_variables)," covariate variable(s). Parameter estimated batch(es): ",
                  paste(names(batch_passTest)[batch_passTest==TRUE],collapse = " "),". And noparameter estimated batch(es): ",
