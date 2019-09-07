@@ -68,6 +68,14 @@ function(input, output,session) {
   #################################################################################
   ###pvca
   getPVCA<-eventReactive(input$pvca_submit,{
+    if(length(input$pvca_effect_name)<2){
+      showModal(modalDialog(
+          title = "An error occur",
+          "At least select two effects!",
+          easyClose = TRUE
+        ))
+      stop("error")
+    }
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
