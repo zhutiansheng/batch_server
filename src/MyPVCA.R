@@ -12,8 +12,8 @@ pvcaBF<-function(df,sampleInfo,batch_effect,threshold){
 pvcaDraw<-function(pvcaobj){
   dat<-as.vector(unlist(pvcaobj$dat))
   label<-pvcaobj$label
-  data<-data.frame(cbind(dat,label))
-  data$dat<-as.numeric(data$dat)
+  data<-data.frame(dat,label)
+  #data$dat<-as.numeric(data$dat)
   p<-ggplot(data, aes(x=label, y=dat, fill="LightSeaGreen")) +
     geom_bar(stat="identity")+theme(legend.position="none")
   p<-p+theme(axis.text.x = element_text(vjust = 0.001,angle = 45))+ylim(0,1)+
@@ -23,8 +23,8 @@ pvcaDraw<-function(pvcaobj){
 pieDraw<-function(pvcaobj){
   dat<-as.vector(unlist(pvcaobj$dat))
   Source<-pvcaobj$label
-  df<-data.frame(cbind(dat,Source))
-  df$dat<-as.numeric(df$dat)
+  df<-data.frame(dat,Source)
+  #df$dat<-as.numeric(df$dat)
   df$percent<-round(df$dat/sum(df$dat)*100,3)
   df$Source<-paste0(Source," (",df$percent,"%)")
   p<-ggplot(df, aes(x = "", weight =percent , fill = Source)) +
