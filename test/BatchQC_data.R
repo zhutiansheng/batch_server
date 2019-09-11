@@ -21,7 +21,7 @@ library(BatchQC)
 
 analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
   pdf(out_pdf)
-  pvcaobj<-pvcaBF(dat,sample_info,c("batch","type"),0.1)
+  pvcaobj<-pvcaBF(t(dat),sample_info,c("batch","type"),0.1)
   pieDraw(pvcaobj)
   drawUMAP(t(dat),type)
   drawUMAP(t(dat),as.factor(batch))
@@ -32,6 +32,12 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
     t<-system.time(dat.combat<-combat(as.matrix(dat),batch,mod = modcombat,par.prior=param))
     message(param)
     message(t)
+    combat_pvcaobj<-pvcaBF(dat.combat,sample_info,c("batch","type"),0.1)
+    pieDraw(combat_pvcaobj)
+    drawUMAP(t(dat.combat),type)
+    drawUMAP(t(dat.combat),as.factor(batch))
+    for(b in batch)
+        drawPrior(combat_edata3$additiondata,b)
   }
   dev.off()
 }
@@ -39,10 +45,9 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
 data(example_batchqc_data)
 batch <- batch_indicator$V1
 condition <- batch_indicator$V2
-
-system.time(
-  d1.combat<-ComBat(as.matrix(signature_data),batch,mod = NULL)
-)
+sample_info<-data.frame(batch,type=condition)
+rownames(sample_info)<-colnames(signature_data)
+analysisBatch(signature_data,batch,condition,sample_info,"signature.pdf")
 
 #####
 #dataset 2
