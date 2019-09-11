@@ -23,7 +23,7 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
   pdf(out_pdf)
   pvcaobj<-pvcaBF(t(dat),sample_info,c("batch","type"),0.1)
   pieDraw(pvcaobj)
-  drawUMAP(t(dat),type)
+  drawUMAP(t(dat),as.factor(type))
   drawUMAP(t(dat),as.factor(batch))
   
   modcombat = model.matrix(~as.factor(type), data=sample_info)
@@ -34,7 +34,7 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
     message(t)
     combat_pvcaobj<-pvcaBF(dat.combat,sample_info,c("batch","type"),0.1)
     pieDraw(combat_pvcaobj)
-    drawUMAP(t(dat.combat),type)
+    drawUMAP(t(dat.combat),as.factor(type))
     drawUMAP(t(dat.combat),as.factor(batch))
     for(b in batch)
         drawPrior(combat_edata3$additiondata,b)
