@@ -64,12 +64,14 @@ analysisBatch(signature_data,batch,condition,sample_info,"signature.pdf")
 #####
 #dataset 2
 #####
-
+library(bladderbatch)
 data(bladderdata)
-pheno <- pData(bladderEset)
+sample_info <- pData(bladderEset)
 edata <- exprs(bladderEset)
 batch <- pheno$batch  
-condition <- pheno$cancer
+type <- as.vector(pheno$cancer)
+colnames(sample_info)[4]<-"type"
+analysisBatch(edata,batch,type,sample_info,"bladder.pdf")
 
 #data set 3
 data(protein_example_data)
