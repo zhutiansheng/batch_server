@@ -1,7 +1,13 @@
-source("global.R")
-# if (!requireNamespace("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# BiocManager::install("BatchQC")
+library(fitdistrplus)
+library(extraDistr)
+library(umap)
+library(ggplot2)
+library(Biobase)
+library(pvca)
+source("src/MyPVCA.R")
+source("test/MyCombat2.R")
+source("src/MyPriorDraw.R")
+source("test/functionsFromsva2.R")
 drawUMAP<-function(myd,label){
   myd[is.na(myd)]<-0
   myumap<-umap(myd,n_neighbors=10)
@@ -31,13 +37,19 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
   for (param in c("auto","parameter","noparameter")) {
     t<-system.time(dat.combat<-combat(as.matrix(dat),batch,mod = modcombat,par.prior=param))
     message(param)
-    message(t)
-    combat_pvcaobj<-pvcaBF(dat.combat,sample_info,c("batch","type"),0.1)
+    print(t)
+    dat2<-dat.combat$bayesdata
+    dat2[is.na(dat2)]<-0
+    combat_pvcaobj<-pvcaBF(t(dat2),sample_info,c("batch","type"),0.1)
     pieDraw(combat_pvcaobj)
-    drawUMAP(t(dat.combat),as.factor(type))
-    drawUMAP(t(dat.combat),as.factor(batch))
-    for(b in batch)
-        drawPrior(combat_edata3$additiondata,b)
+    drawUMAP(t(dat2),as.factor(type))
+    drawUMAP(t(dat2),as.factor(batch))
+    if(param == "auto"){
+      print(dat.combat$additiondata$passTest)
+      for(b in unique(batch))
+        drawPrior(dat.combat$additiondata,b)
+    }
+
   }
   dev.off()
 }
