@@ -18,7 +18,7 @@ pvcaDraw<-function(pvcaobj){
     geom_bar(stat="identity")+theme(legend.position="none")
   p<-p+theme(axis.text.x = element_text(vjust = 0.001,angle = 45))+ylim(0,1)+
     labs(x='Source of variance', y='Weighted average proportion variance')
-  p
+  print(p)
 }
 pieDraw<-function(pvcaobj){
   dat<-as.vector(unlist(pvcaobj$dat))
@@ -32,5 +32,5 @@ pieDraw<-function(pvcaobj){
     coord_polar(theta = "y") + xlab('') + ylab('') +
     #geom_text(aes(x = 1.3, y = Data, label = Sample))+
     theme_minimal()  
-  p
+  print(p)
 }
