@@ -53,6 +53,7 @@ analysisBatch<-function(dat,batch,type,sample_info,out_pdf){
   }
   dev.off()
 }
+#########################################################
 #dataset 1
 data(example_batchqc_data)
 batch <- batch_indicator$V1
@@ -75,3 +76,12 @@ analysisBatch(edata,batch,type,sample_info,"bladder.pdf")
 
 #data set 3
 data(protein_example_data)
+dat<-protein_data
+sample_info<-protein_sample_info[,c("samplename", "Batch","category")]
+sample_info$samplename<-paste0("X",sample_info$samplename)
+rownames(sample_info)<-sample_info[,1]
+colnames(sample_info)<-c("samplename", "batch","type")
+sample_info<-sample_info[colnames(dat),]
+type<-as.vector(sample_info$type)
+batch<-sample_info$batch
+analysisBatch(dat,batch,type,sample_info,"protein.pdf")
