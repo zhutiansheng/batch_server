@@ -4,6 +4,7 @@ library(umap)
 library(ggplot2)
 library(Biobase)
 library(pvca)
+library(BiocParallel)
 source("src/MyPVCA.R")
 source("test/MyCombat2.R")
 source("src/MyPriorDraw.R")
@@ -69,8 +70,8 @@ library(bladderbatch)
 data(bladderdata)
 sample_info <- pData(bladderEset)
 edata <- exprs(bladderEset)
-batch <- pheno$batch  
-type <- as.vector(pheno$cancer)
+batch <- sample_info$batch  
+type <- as.vector(sample_info$cancer)
 colnames(sample_info)[4]<-"type"
 analysisBatch(edata,batch,type,sample_info,"bladder.pdf")
 
