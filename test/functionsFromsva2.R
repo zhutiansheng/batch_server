@@ -70,3 +70,10 @@ int.eprior<-function (sdat, g.hat, d.hat)
   rownames(adjust) <- c("g.star", "d.star")
   adjust
 }
+rowVars<-function (x, ...) 
+{
+    sqr = function(x) x * x
+    n = rowSums(!is.na(x))
+    n[n <= 1] = NA
+    return(rowSums(sqr(x - rowMeans(x, ...)), ...)/(n - 1))
+}
