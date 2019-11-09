@@ -67,7 +67,8 @@ body <- dashboardBody(
     ),
     
     tabItem(tabName = "pvca",
-            
+            h3("PVCA"),
+            h4('PVCA assess the batch sourcs by fitting all "sources" as random effects including two-way interaction terms in the Mixed Model(depends on lme4 package) to selected principal components, which were obtained from the original data correlation matrix. Pierre Bushel (2019). pvca: Principal Variance Component Analysis (PVCA). R package version 1.24.0.'),
             selectInput("pvca_effect_name","Select Contributing Effect Column Name(s)",
                         choices = effect_name,multiple = T),
             sliderInput("pvca_threshold", "Set the percentile value of the minimum amount of the variabilities that the selected principal components need to explain",
@@ -89,8 +90,8 @@ body <- dashboardBody(
             )
     ),
     tabItem(tabName = "umap",            
-            h3("Description:"),
-
+            h3("UMAP"),
+            h4("Uniform Manifold Approximation and Projection (UMAP) is a dimension reduction technique that can be used for visualisation similarly to t-SNE, but also for general non-linear dimension reduction."),      
             sliderInput("n_neighbors", "number of nearest neighbors:",
                         min = 1, max = 100,
                         value = 15),
