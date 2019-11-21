@@ -302,24 +302,12 @@ function(input, output,session) {
     filename = function() {
       "testDataMatrix.csv"
     },
-    content = function(file) {
-      data(bladderdata)
-      dat <- bladderEset[1:100,]
-      #pheno = pData(dat)
-      edata = exprs(dat)
-      write.csv(edata,file,row.names = T,quote = F,na="")
-    }
+    content = function(file) {file.copy("testData/testData.csv",file)}
   )
   output$sampleData_download <- downloadHandler(
     filename = function() {
       "sampleInformation.csv"
     },
-    content = function(file) {
-      data(bladderdata)
-      dat <- bladderEset
-      pheno = pData(dat)
-      #edata = exprs(dat)
-      write.csv(pheno,file,row.names = T,quote = F,na="")
-    }
+    content = function(file) {file.copy("testData/testSampleInfo.csv",file)}
   )
 }
