@@ -1,6 +1,8 @@
 function(input, output,session) {
   observe({
-    effect_name<-colnames(getSampleInfo())
+    if(!is.null(input$sample_info$datapath))
+      if(!is.null(getSampleInfo()))
+         effect_name<-colnames(getSampleInfo())
     adjust_variable<-effect_name
     # if(!is.null(input$batch_effect_name)){
     #   adjust_variable<-effect_name[-which(effect_name==isolate(input$batch_effect_name))]
@@ -30,20 +32,29 @@ function(input, output,session) {
   })
   
   output$upload_note <- renderText({
-    
-    if(is.null(getMyd()))
+    if(is.null(input$sample_info$datapath))
       "Please upload data first"
     else paste("Sucessfully uploaded data dimension is",paste(dim(getMyd()),collapse = " × "),"and sample dimension is",paste(dim(getSampleInfo()),collapse = " × "))
     
   })
   
   getMyd<-eventReactive(input$input_submit, {
+    if(is.null(input$myd$datapath)){
+      showModal(modalDialog(
+        title = "Error message","Please upload your data file!"))
+      stop()
+    }
     withProgress(message = 'Read data in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
     print("data read")               
     myd<-read.table(input$myd$datapath,sep = input$sep,header = input$header,encoding = "UTF-8",check.names = F)  
-    print(input$myd$datapath)
+    error<-dataCheck(myd)
+    if(!is.null(error)){
+      showModal(modalDialog(
+        title = "Error message for data upload",error))
+      stop()
+    }
     df2<-myd[-1]
     rownames(df2)<-myd[,1]
     df2<-t(df2)
@@ -53,11 +64,22 @@ function(input, output,session) {
   },ignoreNULL = T,ignoreInit =T
   )
   getSampleInfo<-eventReactive(input$input_submit, {
+    if(is.null(input$sample_info$datapath)){
+      showModal(modalDialog(
+        title = "Error message","Please upload sample information file!"))
+      stop()
+    }
     print("Read sample")
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
     myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
+    error<-dataCheck(myd)
+    if(!is.null(error)){
+      showModal(modalDialog(
+        title = "Error message for sample upload",error))
+      stop()
+    }
     rownames(myd)<-myd[,1]
     myd<-myd[-1]
     incProgress(9/10,"Sample read completed")

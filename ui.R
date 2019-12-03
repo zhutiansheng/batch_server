@@ -21,7 +21,8 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = "home",
-            h2("This is home")
+            h3("Welcome to Batch Server home"),
+            h5("Batch effects are unwanted sources of variation irrelevant to biological variation inevitably introduced to the samples during experimental handling which would obscure the biological signal. Batch effects are one of the biggest challenges faced by high throughput omics science, especially in the context of large cohort of thousands of samples. Existing batch effect-correcting tools focus mainly on the development of methods that are not convenience of use, usually requiring extensive coding experiences, sometimes even need to know the prior distribution of the data. Moreover, few tools offer both evaluation and correction of batch effects. We developed an open-source web server-based batch effect correction tool, namely BatchServer, which enables users to interactively evaluate and correct batch effects of a variety of omics data.")
     ),
     
     tabItem(tabName = "dataInput",
@@ -186,7 +187,14 @@ The first column must contain the features (such as, protein or gene name). The 
             downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
 
             h5("Parameter descriptions:")
-            )
+            ),
+    tabItem(tabName = "about",
+            h3("Author:"),
+            h5("Tiansheng Zhu; tszhu @ fudan.edu.cn"),
+            h3("License:"),            
+            h5("Batch Server is an open-source software implemented in pure R language and the source code is freely available https://github.com/tszhu/webBatch. 
+Now Batch Server is supported by both zhou’s lab of Fudan University (admis.fudan.edu.cn) and guomics lab of Westlake University (www.guomics.com). The software is published by ''")         
+    )
   )
 )
 dashboardPage(skin = "purple",
