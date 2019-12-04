@@ -78,6 +78,7 @@ function(input, output,session) {
     if(!is.null(error)){
       showModal(modalDialog(
         title = "Error message for sample upload",error))
+      return(NULL)
       stop()
     }
     rownames(myd)<-myd[,1]

@@ -130,7 +130,7 @@ body <- dashboardBody(
     tabItem(tabName = "combat",
             h3("Description:"),
             h4("The ComBat function adjusts for known batches using an empirical Bayesian
-framework. So known batch variable is required in your dataset."),
+framework. So known batch variable is required in your dataset. Here you should pay attention to the [parametric estimate method] choice, which was improved compare to the original ComBat method. The option [automatic] will automatically decide to set parametric estimate method to parametric or nonparametric according to the data distribution."),
             hr(),
             selectInput("batch_effect_name","Select Known Batch Effect Column Name",
                         choices = NULL,multiple = F),
