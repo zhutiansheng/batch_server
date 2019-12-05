@@ -19,7 +19,7 @@ pvcaDraw<-function(pvcaobj){
   #data$dat<-as.numeric(data$dat)
   p<-ggplot(data, aes(x=label, y=dat, fill="LightSeaGreen")) +
     geom_bar(stat="identity")+theme(legend.position="none")
-  p<-p+theme(axis.text.x = element_text(vjust = 0.001,angle = 45))+ylim(0,1)+
+  p<-p+theme(axis.text.x = element_text(vjust = 0.5,angle = 45))+ylim(0,1)+
     labs(x='Source of variance', y='Weighted average proportion variance')
   print(p)
 }

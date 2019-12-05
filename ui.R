@@ -41,7 +41,7 @@ body <- dashboardBody(
                                      Semicolon = ";",
                                      Tab = "\t"),
                          selected = ",",inline = T),
-            
+            checkboxInput("qn", "Quantile normalization", FALSE),
             # Horizontal line ----
             tags$hr(),
             # Input: Select a file ----
@@ -77,16 +77,16 @@ body <- dashboardBody(
             actionButton("pvca_submit", "Submit", class = "btn-primary"),
             tags$hr(),
             tabsetPanel(
-              tabPanel(
-                "Barplot",
-            plotOutput("draw_pvca"),
-            uiOutput("pvca_ui")
-              ),
             tabPanel(
               "Pieplot",
               plotOutput("draw_pie"),
               uiOutput("pvca_pie_ui")
-              )
+              ),
+            tabPanel(
+              "Barplot",
+              column(12,plotOutput("draw_pvca"),
+                     uiOutput("pvca_ui"))
+            )
             )
     ),
     tabItem(tabName = "umap",            
@@ -186,7 +186,7 @@ The first column must contain the features (such as, protein or gene name). The 
 "),            
             downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
 
-            h5("Parameter descriptions:")
+            h5("")
             ),
     tabItem(tabName = "about",
             h3("Author:"),

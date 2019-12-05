@@ -56,6 +56,20 @@ function(input, output,session) {
       stop()
     }
     df2<-myd[-1]
+    if(input$qn){
+      df2<-try(normalize.quantiles(as.matrix(df2)),silent = T)
+      if("try-error" %in% class(df2)){
+        showModal(modalDialog(
+          title = "An error occur",
+          df2[1],
+          easyClose = TRUE
+        ))
+        stop("error")
+      }
+      df2<-data.frame(df2)
+      colnames(df2)<-colnames(myd[-1])
+    }
+
     rownames(df2)<-myd[,1]
     df2<-t(df2)
     incProgress(9/10,"Data read completed")
@@ -66,7 +80,7 @@ function(input, output,session) {
   getSampleInfo<-eventReactive(input$input_submit, {
     if(is.null(input$sample_info$datapath)){
       showModal(modalDialog(
-        title = "Error message","Please upload sample information file!"))
+        title = "Error message for sample upload","Please upload sample information file!"))
       stop()
     }
     print("Read sample")
@@ -78,8 +92,8 @@ function(input, output,session) {
     if(!is.null(error)){
       showModal(modalDialog(
         title = "Error message for sample upload",error))
-      return(NULL)
-      stop()
+       #return(NULL)
+        stop()
     }
     rownames(myd)<-myd[,1]
     myd<-myd[-1]
@@ -103,7 +117,15 @@ function(input, output,session) {
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
     print("pvca start")
-    pvcaobj<-pvcaBF(getMyd(),getSampleInfo(),input$pvca_effect_name,input$pvca_threshold)
+    pvcaobj<-try(pvcaBF(getMyd(),getSampleInfo(),input$pvca_effect_name,input$pvca_threshold),silent = T)
+    if("try-error" %in% class(pvcaobj)){
+      showModal(modalDialog(
+        title = "An error occur",
+        pvcaobj[1],
+        easyClose = TRUE
+      ))
+      stop("error")
+    }
     incProgress(9/10,"Prepare to return")
                  })
     print("pvca return")
@@ -160,7 +182,15 @@ function(input, output,session) {
     print("umap start")
     myd<-getMyd()
     myd[is.na(myd)]<-0
-    myumap<-umap(myd,n_neighbors=input$n_neighbors)
+    myumap<-try(umap(myd,n_neighbors=input$n_neighbors),silent = T)
+    if("try-error" %in% class(myumap)){
+      showModal(modalDialog(
+        title = "An error occur",
+        myumap[1],
+        easyClose = TRUE
+      ))
+      stop("error")
+    }
     umap.layout<-data.frame(myumap$layout)
     incProgress(9/10,"Finished!")
     })           
@@ -168,8 +198,17 @@ function(input, output,session) {
   },ignoreNULL = T,ignoreInit =T
   )
   output$umap_note <- renderText({
-    if(!is.null(getUmap()))
-    "UMAP calculation is done. Select following to (re)draw UMAP"
+    temp<-getUmap()
+    if("try-error" %in% class(temp)){
+      showModal(modalDialog(
+        title = "An error occur",
+        temp[1],
+        easyClose = TRUE
+      ))
+      stop("error")
+    }
+    else if(!is.null(temp))
+      "UMAP calculation is done. Select following to (re)draw UMAP"
   })
   
   drawUmap<-eventReactive(input$umap_effect_name,{
@@ -206,6 +245,7 @@ function(input, output,session) {
   #######################################################################33
   ##remove batch effect
   eliminateBF<-eventReactive(input$elimination_submit,{
+    errors<-try({
     withProgress(message = 'Calculating now',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
@@ -224,7 +264,16 @@ function(input, output,session) {
                       mean.only = input$mean.only, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
     incProgress(9/10,"Completed")
                  })
-    return(result)
+    },silent = T)
+    if("try-error" %in% class(errors)){
+      showModal(modalDialog(
+        title = "An error occur",
+        errors[1],
+        easyClose = TRUE
+      ))
+      stop("error")
+    }
+    else return(result)
   },ignoreNULL = T,ignoreInit =T)
   
   output$combat_log<-renderText({
