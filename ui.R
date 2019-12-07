@@ -22,7 +22,7 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName = "home",
             h3("Welcome to Batch Server home"),
-            h5("Batch effects are unwanted sources of variation irrelevant to biological variation inevitably introduced to the samples during experimental handling which would obscure the biological signal. Batch effects are one of the biggest challenges faced by high throughput omics science, especially in the context of large cohort of thousands of samples. Existing batch effect-correcting tools focus mainly on the development of methods that are not convenience of use, usually requiring extensive coding experiences, sometimes even need to know the prior distribution of the data. Moreover, few tools offer both evaluation and correction of batch effects. We developed an open-source web server-based batch effect correction tool, namely BatchServer, which enables users to interactively evaluate and correct batch effects of a variety of omics data.")
+            HTML('<p class="MsoNormal">Batch effects are unwanted sources of variation irrelevant to biological variation inevitably introduced to the samples during experimental handling which would obscure the biological signal. Batch effects are one of the biggest challenges faced by high throughput omics science, especially in the context of large cohort of thousands of samples. Existing batch effect-correcting tools focus mainly on the development of methods that are not convenience of use, usually requiring extensive coding experiences, sometimes even need to know the prior distribution of the data. Moreover, few tools offer both evaluation and correction of batch effects. We developed an open-source web server-based batch effect correction tool, namely BatchServer, which enables users to interactively evaluate and correct batch effects of a variety of omics data.')
     ),
     
     tabItem(tabName = "dataInput",
@@ -33,7 +33,7 @@ body <- dashboardBody(
                                  "text/comma-separated-values,text/plain",
                                  ".csv")),
             # Input: Checkbox if file has header ----
-            checkboxInput("header", "Header", TRUE),
+            #checkboxInput("header", "Header", TRUE),
             
             # Input: Select separator ----
             radioButtons("sep", "Separator",
@@ -51,7 +51,7 @@ body <- dashboardBody(
                                  "text/comma-separated-values,text/plain",
                                  ".csv")),
             # Input: Checkbox if file has header ----
-            checkboxInput("sample_header", "Header", TRUE),
+            #checkboxInput("sample_header", "Header", TRUE),
             
             # Input: Select separator ----
             radioButtons("sample_sep", "Separator",
@@ -59,7 +59,7 @@ body <- dashboardBody(
                                      Semicolon = ";",
                                      Tab = "\t"),
                          selected = ",",inline = T),
-            
+              
             # Horizontal line ----
             tags$hr(),
             actionButton("input_submit", "Submit", class = "btn-primary"),
@@ -174,25 +174,70 @@ mean of the batch effects across batches (default adjusts the mean and variance)
     ),
     tabItem(tabName = "readme",
             h3("Test Data Download"),
-            h5("There are two type of files users should prepare in order to use BatchServer:
+            HTML("<p class='MsoNormal'>There are two type of files users should prepare in order to use BatchServer:
 data matrix file and sample information file. The format of these two files can be tab-delimited or space-separated .txt file or comma-delimited .csv file.
 Here is an example of a data file and sample information file: "),
-            h5("Sample information file:
+            HTML("<p class='MsoNormal'>Sample information file:
 The first column must contain the names of the samples (column names) as in your data file. The columns after sample name include batch and covariate name. Note since ComBat only deals with categorical covariates, numerical covariates have not been supported by BatchEffect currently.
 "),            
             downloadButton("sampleData_download", "sampleInfo", class = "btn-primary"),
-            h5("Data file:
+            HTML("<p class='MsoNormal'>Data file:
 The first column must contain the features (such as, protein or gene name). The first row must contain all sample name as exectly as in your sample information file.
 "),            
             downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
 
-            h5("")
+            HTML('<p>
+	<br />
+</p>
+<h3>
+	<span>Data input</span>
+</h3>
+<p class="MsoNormal">
+	<span>Data input is the only input interface for you
+to upload your own data files through web interface. BatchServer requires only
+two input text files. One is a matrix file containing numeric values (e.g.
+expression value) for each sample, whereas the other is a annotation file of
+matrix samples. For demonstration of the service you can use the provided
+example files after downloading them. On the Data input section, click on the
+file upload field and select the data you want to upload. Choose separator for
+the file according to its format. `Comma` for .csv, `Semicolon`, `Comma` or
+`Tab` for flat text file. Do the same with sample information/annotation file.
+Quantile normalitztion is optional for you to do with data matrix only.</span>&nbsp;
+</p>
+<p class="MsoNormal">
+	<img src="help/dataInput.png" alt="Data input" />
+</p>
+<h3>
+	<span>Batch effect estimation, visualization and
+correction</span>
+</h3>
+<p class="MsoNormal">
+	<span>After uploaded both data and sample
+information files. You are advised to do evaluation step first to check whether
+the data has batch effect or not using PVCA or UMAP. Both methods will show the
+figures of batch effects. If the batch effect is severer, the next step is to
+remove it using improved ComBat or random forest. We provide the performance of
+compare original ComBat and improved ComBat using PVCA and UMAP in
+Supplementary File.</span>&nbsp;
+</p>
+<h3>
+	<span>Data output</span>
+</h3>
+<p class="MsoNormal">
+	<span>You could examine and download the result
+figures of batch effect evaluation to evaluate the batch effect from the figures
+by manual inspection. The batch effect corrected data are also provided for
+user to down-load by improved ComBat and random forest.</span>
+</p>
+<p>
+	<br />
+</p>')
             ),
     tabItem(tabName = "about",
             h3("Author:"),
-            h5("Tiansheng Zhu; tszhu @ fudan.edu.cn"),
+            HTML("Tiansheng Zhu; tszhu @ fudan.edu.cn"),
             h3("License:"),            
-            h5("Batch Server is an open-source software implemented in pure R language and the source code is freely available https://github.com/tszhu/webBatch. 
+            HTML("Batch Server is an open-source software implemented in pure R language and the source code is freely available https://github.com/tszhu/webBatch. 
 Now Batch Server is supported by both zhou’s lab of Fudan University (admis.fudan.edu.cn) and guomics lab of Westlake University (www.guomics.com). The software is published by ''")         
     )
   )

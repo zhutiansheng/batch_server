@@ -48,7 +48,7 @@ function(input, output,session) {
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
     print("data read")               
-    myd<-read.table(input$myd$datapath,sep = input$sep,header = input$header,encoding = "UTF-8",check.names = F)  
+    myd<-read.table(input$myd$datapath,sep = input$sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
     error<-dataCheck(myd)
     if(!is.null(error)){
       showModal(modalDialog(
@@ -87,7 +87,7 @@ function(input, output,session) {
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
-    myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = input$sample_header,encoding = "UTF-8",check.names = F)  
+    myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
     error<-dataCheck(myd)
     if(!is.null(error)){
       showModal(modalDialog(
