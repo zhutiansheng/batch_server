@@ -32,8 +32,15 @@ function(input, output,session) {
   })
   
   output$upload_note <- renderText({
+    #print(rownames(getMyd()))
+    #print(rownames(getSampleInfo()))
     if(is.null(input$sample_info$datapath))
       "Please upload data first"
+    else if(length(setdiff(rownames(getMyd()),rownames(getSampleInfo())))!=0){
+      showModal(modalDialog(
+        title = "Error message","Sample names in data file should be in sample information file."))
+      stop()
+    }
     else paste("Sucessfully uploaded data dimension is",paste(dim(getMyd()),collapse = " × "),"and sample dimension is",paste(dim(getSampleInfo()),collapse = " × "))
     
   })
