@@ -1,5 +1,5 @@
 # Batch server
-With the development of omics technology, more and more data has been generating with non-biological variations always existing in omics data. Subsequently, there has been increasingly more attention in analyzing batch effects. Batch server is to provide a convenient, easy and practical web server to deal with batch effect.
+With the development of omics technology, more and more data has been generating with non-biological variations always existing in omics data. Subsequently, there has been increasingly more attention in analyzing batch effects. Batch server dedicate to provide a convenient, easy and practical web server to deal with batch effect.
 # Installation
 Install all the packages in global.R.
 # Run
