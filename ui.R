@@ -8,7 +8,7 @@ sidebar <- dashboardSidebar(
              menuSubItem("PVCA", tabName = "pvca", icon = icon("angle-left")),
              menuSubItem("UMAP", tabName = "umap", icon = icon("angle-left"))
              ),
-    menuItem("Elimination", icon = icon("line-chart"), tabName = "elimination",
+    menuItem("Correction", icon = icon("line-chart"), tabName = "elimination",
              badgeColor = "blue",
              menuSubItem("ComBat", tabName = "combat", icon = icon("angle-left")),
              menuSubItem("RandomForest", tabName = "rf", icon = icon("angle-left"))
@@ -31,7 +31,9 @@ body <- dashboardBody(
                       multiple = FALSE,
                       accept = c("text/csv",
                                  "text/comma-separated-values,text/plain",
-                                 ".csv")),
+                                 ".csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          ".xlsx")),
             # Input: Checkbox if file has header ----
             #checkboxInput("header", "Header", TRUE),
             
@@ -39,9 +41,20 @@ body <- dashboardBody(
             radioButtons("sep", "Separator",
                          choices = c(Comma = ",",
                                      Semicolon = ";",
-                                     Tab = "\t"),
+                                     Tab = "\t",
+                                     'xls/xlsx' = "xlsx"),
                          selected = ",",inline = T),
-            checkboxInput("qn", "Quantile normalization", FALSE),
+          radioButtons("missing_replace_input",
+                       "Missing value replacement",
+                       choices = c(
+                         "None" = "none",
+                         "1" = '1',
+                         '0' = "0",
+                         "10% of minimum" = '0.1',
+                         "minimum" = "minimum"
+                       ),inline = TRUE,selected = "0"),  
+          checkboxInput("qn", "Quantile normalization", FALSE),
+            
             # Horizontal line ----
             tags$hr(),
             # Input: Select a file ----
@@ -49,7 +62,9 @@ body <- dashboardBody(
                       multiple = FALSE,
                       accept = c("text/csv",
                                  "text/comma-separated-values,text/plain",
-                                 ".csv")),
+                                 ".csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          ".xlsx")),
             # Input: Checkbox if file has header ----
             #checkboxInput("sample_header", "Header", TRUE),
             
@@ -57,7 +72,8 @@ body <- dashboardBody(
             radioButtons("sample_sep", "Separator",
                          choices = c(Comma = ",",
                                      Semicolon = ";",
-                                     Tab = "\t"),
+                                     Tab = "\t",
+                                     'xls/xlsx' = "xlsx"),
                          selected = ",",inline = T),
               
             # Horizontal line ----
@@ -91,8 +107,18 @@ body <- dashboardBody(
     ),
     tabItem(tabName = "umap",            
             h3("UMAP"),
-            h4("Uniform Manifold Approximation and Projection (UMAP) is a dimension reduction technique that can be used for visualisation similarly to t-SNE, but also for general non-linear dimension reduction."),      
-            sliderInput("n_neighbors", "number of nearest neighbors:",
+            h4("Uniform Manifold Approximation and Projection (UMAP) is a dimension reduction technique that can be used for visualisation similarly to t-SNE, but also for general non-linear dimension reduction. Please note that missing value is not allowed in data matrix in umap."),      
+            hr(),
+            radioButtons("missing_replace",
+              "Missing value replacement",
+              choices = c(
+                "None" = "none",
+                "1" = '1',
+                '0' = "0",
+                "10% of minimum" = '0.1',
+                "minimum" = "minimum"
+              ),inline = TRUE,selected = "0"),
+	    sliderInput("n_neighbors", "number of nearest neighbors:",
                         min = 1, max = 100,
                         value = 15),
             radioButtons("metric", "distances method",
@@ -152,7 +178,7 @@ mean of the batch effects across batches (default adjusts the mean and variance)
                          choices = c(No = FALSE,
                                      Yes = TRUE),
                          selected = FALSE,inline = T),
-            actionButton("elimination_submit", "Elimination", class = "btn-primary"),
+            actionButton("elimination_submit", "Submit", class = "btn-primary"),
             verbatimTextOutput("combat_log"),
             uiOutput("combat_ui")
     ),
@@ -175,11 +201,11 @@ mean of the batch effects across batches (default adjusts the mean and variance)
     tabItem(tabName = "readme",
             h3("Test Data Download"),
             HTML("<p class='MsoNormal'>There are two type of files users should prepare in order to use BatchServer:
-data matrix file and sample information file. The format of these two files can be tab-delimited or space-separated .txt file or comma-delimited .csv file.
+data matrix file and sample information file. The format of these two files can be tab-delimited or space-separated .txt file or comma-delimited .csv file or excel file.
 Here is an example of a data file and sample information file: "),
             HTML("<p class='MsoNormal'>Sample information file:
-The first column must contain the names of the samples (column names) as in your data file. The columns after sample name include batch and covariate name. Note since ComBat only deals with categorical covariates, numerical covariates have not been supported by BatchEffect currently.
-"),            
+The first column must contain the names of the samples (column names) as in your data file. The columns after sample name include batch and covariate name. Note since ComBat only deals with categorical covariates, numerical covariates have not been supported by BatchServer currently.
+ Missing value is not allowed."),            
             downloadButton("sampleData_download", "sampleInfo", class = "btn-primary"),
             HTML("<p class='MsoNormal'>Data file:
 The first column must contain the features (such as, protein or gene name). The first row must contain all sample name as exectly as in your sample information file.
@@ -201,11 +227,8 @@ matrix samples. For demonstration of the service you can use the provided
 example files after downloading them. On the Data input section, click on the
 file upload field and select the data you want to upload. Choose separator for
 the file according to its format. `Comma` for .csv, `Semicolon`, `Comma` or
-`Tab` for flat text file. Do the same with sample information/annotation file.
+`Tab` for flat text file and `xls(x)` for excel file. Do the same with sample information/annotation file.
 Quantile normalitztion is optional for you to do with data matrix only.</span>&nbsp;
-</p>
-<p class="MsoNormal">
-	<img src="help/dataInput.png" alt="Data input" />
 </p>
 <h3>
 	<span>Batch effect estimation, visualization and
@@ -237,7 +260,7 @@ user to down-load by improved ComBat and random forest.</span>
             h3("Author:"),
             HTML("Tiansheng Zhu; tszhu @ fudan.edu.cn"),
             h3("License:"),            
-            HTML("Batch Server is an open-source software implemented in pure R language and the source code is freely available https://github.com/tszhu/webBatch. 
+            HTML("Batch Server is an open-source software implemented in pure R language and the source code is freely available at https://github.com/zhutiansheng/batch_server. 
 Now Batch Server is supported by both zhou’s lab of Fudan University (admis.fudan.edu.cn) and guomics lab of Westlake University (www.guomics.com). The software is published by ''")         
     )
   )

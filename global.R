@@ -1,6 +1,6 @@
 options(stringsAsFactors = F)
 options(encoding = 'UTF-8')
-options(shiny.maxRequestSize=500*1024^2)
+options(shiny.maxRequestSize=5*1024^3)
 set.seed(12345)
 #load library
 library(shiny)
@@ -15,9 +15,12 @@ library(Biobase)
 library(pvca)
 library(randomForest)
 library(preprocessCore)
+library(openxlsx)
+
 #library(bladderbatch)#testdata
 #import user defined functions
 source('src/MyCombat.R')
+environment(my_it.sol) <- asNamespace('sva')
 environment(combat) <- asNamespace('sva')
 source('src/MyPVCA.R')
 source('src/MyPriorDraw.R')
@@ -33,4 +36,15 @@ dataCheck<-function(d){
     error="Error: The first column should be unique sample id/name!"
   }
   return(error)
+}
+missingValueReplace<-function(d,v){
+  if(v!="none"){
+    switch(v,
+           "1" = d[is.na(d)]<-1,
+           "0" = d[is.na(d)]<-0,
+           minimum = d[is.na(d)]<-min(d,na.rm = T),
+           "0.1" = d[is.na(d)]<-0.1*min(d,na.rm = T)
+    )  
+  }
+  return(d)
 }

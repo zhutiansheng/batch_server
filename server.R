@@ -55,7 +55,12 @@ function(input, output,session) {
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
     print("data read")               
-    myd<-read.table(input$myd$datapath,sep = input$sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
+    if(input$sep=="xlsx"){
+      myd <- openxlsx::read.xlsx(input$myd$datapath)      
+    }
+    else{
+      myd<-read.table(input$myd$datapath,sep = input$sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
+      }  
     error<-dataCheck(myd)
     if(!is.null(error)){
       showModal(modalDialog(
@@ -63,6 +68,8 @@ function(input, output,session) {
       stop()
     }
     df2<-myd[-1]
+    df2<-missingValueReplace(df2,input$missing_replace_input)
+    
     if(input$qn){
       df2<-try(normalize.quantiles(as.matrix(df2)),silent = T)
       if("try-error" %in% class(df2)){
@@ -94,7 +101,13 @@ function(input, output,session) {
     withProgress(message = 'Read sample in progress',
                  detail = 'This may take a while...', value = 0, {
                    incProgress(1/10)
-    myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
+                       if(input$sample_sep=="xlsx"){
+                     myd <- openxlsx::read.xlsx(input$sample_info$datapath)
+                     
+                   }
+                   else{               
+                      myd<-read.table(input$sample_info$datapath,sep = input$sample_sep,header = T,quote = "",encoding = "UTF-8",check.names = F)  
+                   }  
     error<-dataCheck(myd)
     if(!is.null(error)){
       showModal(modalDialog(
@@ -188,7 +201,7 @@ function(input, output,session) {
                    incProgress(1/10)
     print("umap start")
     myd<-getMyd()
-    myd[is.na(myd)]<-0
+    myd<-missingValueReplace(myd,input$missing_replace)
     myumap<-try(umap(myd,n_neighbors=input$n_neighbors),silent = T)
     if("try-error" %in% class(myumap)){
       showModal(modalDialog(
@@ -220,7 +233,7 @@ function(input, output,session) {
   
   drawUmap<-eventReactive(input$umap_effect_name,{
     mydf<-data.frame(getUmap())
-    mydf$label<-getSampleInfo()[rownames(getMyd()),input$umap_effect_name]
+    mydf$label<-as.character(getSampleInfo()[rownames(getMyd()),input$umap_effect_name])
     p<-ggplot(mydf,aes(x=X1, y=X2, colour=label)) + geom_point(size=3)+
       theme(  #panel.grid.major = element_blank(),
         #panel.grid.minor = element_blank(),
@@ -284,7 +297,7 @@ function(input, output,session) {
   },ignoreNULL = T,ignoreInit =T)
   
   output$combat_log<-renderText({
-    print(str(eliminateBF()))
+    #print(str(eliminateBF()))
     if(length(eliminateBF())<1)
       eliminateBF()
     else {
@@ -332,7 +345,7 @@ function(input, output,session) {
                    incProgress(1/10)
                    print("random forest start")
                    label<-getSampleInfo()[,input$batch_effect_name_rf]
-                   dat<-data.frame(getMyd())
+                   dat<-data.frame(getMyd(),check.names = F)
                    #print(head(dat))
                    dat$label<-as.factor(label)
                    result<-myRF(dat,input$ntree,input$nodesize)
@@ -371,9 +384,9 @@ function(input, output,session) {
       paste("SubSet", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      features_remain<-setdiff(rownames(getMyd()),getImpFeature()$features[1:input$topN])
+      features_remain<-setdiff(colnames(getMyd()),getImpFeature()$features[1:input$topN])
       
-      write.csv(getMyd()[features_remain,],file,row.names = T,quote = F,na="")
+      write.csv(t(getMyd()[,features_remain]),file,row.names = T,quote = F,na="")
     }
   )
   ######test data download
