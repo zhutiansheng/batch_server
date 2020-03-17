@@ -1,7 +1,7 @@
 pvcaBF<-function(df,sampleInfo,batch_effect,threshold){
   print("pvcaBF start")
   df<-data.matrix(t(df))
-  df[is.na(df)]<-0
+  #df[is.na(df)]<-0
   #df<-df[,rownames(sampleInfo)]
   sampleInfo<-sampleInfo[colnames(df),]
   phenoData <- new("AnnotatedDataFrame",data=sampleInfo)
