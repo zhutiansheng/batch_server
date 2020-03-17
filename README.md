@@ -3,12 +3,12 @@ Batch effects are unwanted sources of data variation that obscure biological sig
 
 # Installation
 Install all the packages in global.R.
-## Install the devtools
+#### Install the devtools
 install.packages("devtools")
 library(devtools)
-## Install packages on CRAN
+#### Install packages on CRAN
 install.packages(c("shiny","shinydashboard",”fitdistrplus”, "extraDistr","umap","ggplot2","plotly","openxlsx”)
-## Packages on Bioconductor
+#### Packages on Bioconductor
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("sva","Biobase","pvca","preprocessCore")) 
 
