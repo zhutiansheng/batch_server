@@ -10,8 +10,8 @@ sidebar <- dashboardSidebar(
              ),
     menuItem("Correction", icon = icon("line-chart"), tabName = "elimination",
              badgeColor = "blue",
-             menuSubItem("ComBat", tabName = "combat", icon = icon("angle-left")),
-             menuSubItem("RandomForest", tabName = "rf", icon = icon("angle-left"))
+             menuSubItem("ComBat", tabName = "combat", icon = icon("angle-left"))
+             #,menuSubItem("RandomForest", tabName = "rf", icon = icon("angle-left"))
              ),
     menuItem("ReadMe", tabName = "readme",badgeLabel = "help", badgeColor = "red", icon=icon("mortar-board")),
     menuItem("About", tabName = "about", icon = icon("question"))
@@ -21,8 +21,9 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   tabItems(
     tabItem(tabName = "home",
-            h3("Welcome to Batch Server home"),
-            HTML('<p class="MsoNormal">Batch effects are unwanted sources of variation irrelevant to biological variation inevitably introduced to the samples during experimental handling which would obscure the biological signal. Batch effects are one of the biggest challenges faced by high throughput omics science, especially in the context of large cohort of thousands of samples. Existing batch effect-correcting tools focus mainly on the development of methods that are not convenience of use, usually requiring extensive coding experiences, sometimes even need to know the prior distribution of the data. Moreover, few tools offer both evaluation and correction of batch effects. We developed an open-source web server-based batch effect correction tool, namely BatchServer, which enables users to interactively evaluate and correct batch effects of a variety of omics data.')
+            h2("Welcome to Batch Server home"),
+            includeMarkdown("help/main.Rmd")
+            #HTML('<p class="MsoNormal">Batch effects are unwanted sources of variation irrelevant to biological variation inevitably introduced to the samples during experimental handling which would obscure the biological signal. Batch effects are one of the biggest challenges faced by high throughput omics science, especially in the context of large cohort of thousands of samples. Existing batch effect-correcting tools focus mainly on the development of methods that are not convenience of use, usually requiring extensive coding experiences, sometimes even need to know the prior distribution of the data. Moreover, few tools offer both evaluation and correction of batch effects. We developed an open-source web server-based batch effect correction tool, namely BatchServer, which enables users to interactively evaluate and correct batch effects of a variety of omics data.')
     ),
     
     tabItem(tabName = "dataInput",
@@ -182,82 +183,32 @@ mean of the batch effects across batches (default adjusts the mean and variance)
             verbatimTextOutput("combat_log"),
             uiOutput("combat_ui")
     ),
-    tabItem(tabName = "rf",
-            h3("Description:"),
-            h4("Remove most importances batch related variables using Random Forest "),
-            hr(),
-            selectInput("batch_effect_name_rf","Select Known Batch Effect Column Name",
-                        choices = NULL,multiple = F),
-            numericInput("ntree", "Number of trees to grow", 500,
-                         1, 5000, 1),
-            numericInput("nodesize", "Minimum size of terminal nodes", 5,
-                         1, 500, 1),
-            numericInput("topN", "Number of top effect batch related variables to delete", 5,
-                         1, 500, 1),
-            actionButton("rf_submit", "Submit", class = "btn-primary"),
-            verbatimTextOutput("rf_log"),
-            uiOutput("rf_ui")
-    ),
+    # tabItem(tabName = "rf",
+    #         h3("Description:"),
+    #         h4("Remove most importances batch related variables using Random Forest "),
+    #         hr(),
+    #         selectInput("batch_effect_name_rf","Select Known Batch Effect Column Name",
+    #                     choices = NULL,multiple = F),
+    #         numericInput("ntree", "Number of trees to grow", 500,
+    #                      1, 5000, 1),
+    #         numericInput("nodesize", "Minimum size of terminal nodes", 5,
+    #                      1, 500, 1),
+    #         numericInput("topN", "Number of top effect batch related variables to delete", 5,
+    #                      1, 500, 1),
+    #         actionButton("rf_submit", "Submit", class = "btn-primary"),
+    #         verbatimTextOutput("rf_log"),
+    #         uiOutput("rf_ui")
+    # ),
     tabItem(tabName = "readme",
-            h3("Test Data Download"),
-            HTML("<p class='MsoNormal'>There are two type of files users should prepare in order to use BatchServer:
-data matrix file and sample information file. The format of these two files can be tab-delimited or space-separated .txt file or comma-delimited .csv file or excel file.
-Here is an example of a data file and sample information file: "),
-            HTML("<p class='MsoNormal'>Sample information file:
-The first column must contain the names of the samples (column names) as in your data file. The columns after sample name include batch and covariate name. Note since ComBat only deals with categorical covariates, numerical covariates have not been supported by BatchServer currently.
- Missing value is not allowed."),            
+            h3("Test data download"),
             downloadButton("sampleData_download", "sampleInfo", class = "btn-primary"),
-            HTML("<p class='MsoNormal'>Data file:
-The first column must contain the features (such as, protein or gene name). The first row must contain all sample name as exectly as in your sample information file.
-"),            
-            downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
+           downloadButton("testData_download", "dataMatrix", class = "btn-primary"),
 
-            HTML('<p>
-	<br />
-</p>
-<h3>
-	<span>Data input</span>
-</h3>
-<p class="MsoNormal">
-	<span>Data input is the only input interface for you
-to upload your own data files through web interface. BatchServer requires only
-two input text files. One is a matrix file containing numeric values (e.g.
-expression value) for each sample, whereas the other is a annotation file of
-matrix samples. For demonstration of the service you can use the provided
-example files after downloading them. On the Data input section, click on the
-file upload field and select the data you want to upload. Choose separator for
-the file according to its format. `Comma` for .csv, `Semicolon`, `Comma` or
-`Tab` for flat text file and `xls(x)` for excel file. Do the same with sample information/annotation file.
-Quantile normalitztion is optional for you to do with data matrix only.</span>&nbsp;
-</p>
-<h3>
-	<span>Batch effect estimation, visualization and
-correction</span>
-</h3>
-<p class="MsoNormal">
-	<span>After uploaded both data and sample
-information files. You are advised to do evaluation step first to check whether
-the data has batch effect or not using PVCA or UMAP. Both methods will show the
-figures of batch effects. If the batch effect is severer, the next step is to
-remove it using improved ComBat or random forest. We provide the performance of
-compare original ComBat and improved ComBat using PVCA and UMAP in
-Supplementary File.</span>&nbsp;
-</p>
-<h3>
-	<span>Data output</span>
-</h3>
-<p class="MsoNormal">
-	<span>You could examine and download the result
-figures of batch effect evaluation to evaluate the batch effect from the figures
-by manual inspection. The batch effect corrected data are also provided for
-user to down-load by improved ComBat and random forest.</span>
-</p>
-<p>
-	<br />
-</p>')
+            includeMarkdown("help/readme.Rmd")
+
             ),
     tabItem(tabName = "about",
-            h3("Author:"),
+            h3("Software Author:"),
             HTML("Tiansheng Zhu; tszhu @ fudan.edu.cn"),
             h3("License:"),            
             HTML("Batch Server is an open-source software implemented in pure R language and the source code is freely available at https://github.com/zhutiansheng/batch_server. 
