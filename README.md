@@ -7,9 +7,10 @@ Install all the packages in global.R.
 install.packages("devtools")
 library(devtools)
 #### Install packages on CRAN
-install.packages(c("shiny","shinydashboard",”fitdistrplus”, "extraDistr","umap","ggplot2","plotly","openxlsx”)
+install.packages(c("shiny","shinydashboard",”fitdistrplus”, "extraDistr","umap","ggplot2","plotly","openxlsx”))
 #### Packages on Bioconductor
 source("http://bioconductor.org/biocLite.R")
+
 biocLite(c("sva","Biobase","pvca","preprocessCore")) 
 
 # Running
