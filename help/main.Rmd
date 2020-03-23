@@ -1,4 +1,4 @@
-###  ***BatchSerer*** is a web server for batch effects evaluation, visualization, and correction.
+###  ***BatchSerer*** is a web server for batch effect evaluation, visualization and correction.
 
 ![image.png](architecture.png)
 	
