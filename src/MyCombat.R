@@ -1,5 +1,5 @@
-combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",  
-          mean.only = FALSE, ref.batch = NULL, BPPARAM = bpparam("SerialParam")) 
+combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
+          mean.only = FALSE, ref.batch = NULL, BPPARAM = bpparam("SerialParam"))
 {
   if (mean.only == TRUE) {
     message("Using the 'mean only' version of ComBat")
@@ -40,7 +40,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
     check[ref] <- FALSE
   }
   design <- as.matrix(design[, !check])
-  message("Adjusting for", ncol(design) - ncol(batchmod), 
+  message("Adjusting for", ncol(design) - ncol(batchmod),
           "covariate(s) or covariate level(s)")
   if (qr(design)$rank < ncol(design)) {
     if (ncol(design) == (n.batch + 1)) {
@@ -48,7 +48,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
       stop("The covariate is confounded with batch! Remove the covariate and rerun ComBat")
     }
     if (ncol(design) > (n.batch + 1)) {
-      if ((qr(design[, -c(1:n.batch)])$rank < ncol(design[, 
+      if ((qr(design[, -c(1:n.batch)])$rank < ncol(design[,
                                                           -c(1:n.batch)]))) {
         return("The covariates are confounded! Please remove one or more of the covariates so the design is not confounded")
         stop("The covariates are confounded! Please remove one or more of the covariates so the design is not confounded")
@@ -61,12 +61,12 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
   }
   NAs <- any(is.na(dat))
   if (NAs) {
-    message(c("Found", sum(is.na(dat)), "Missing Data Values"), 
+    message(c("Found", sum(is.na(dat)), "Missing Data Values"),
             sep = " ")
   }
   cat("Standardizing Data across genes\n")
   if (!NAs) {
-    B.hat <- solve(crossprod(design), tcrossprod(t(design), 
+    B.hat <- solve(crossprod(design), tcrossprod(t(design),
                                                  as.matrix(dat)))
   }
   else {
@@ -76,28 +76,28 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
     grand.mean <- t(B.hat[ref, ])
   }
   else {
-    grand.mean <- crossprod(n.batches/n.array, B.hat[1:n.batch, 
+    grand.mean <- crossprod(n.batches/n.array, B.hat[1:n.batch,
                                                      ])
   }
   if (!NAs) {
     if (!is.null(ref.batch)) {
       ref.dat <- dat[, batches[[ref]]]
-      var.pooled <- ((ref.dat - t(design[batches[[ref]], 
+      var.pooled <- ((ref.dat - t(design[batches[[ref]],
                                          ] %*% B.hat))^2) %*% rep(1/n.batches[ref], n.batches[ref])
     }
     else {
-      var.pooled <- ((dat - t(design %*% B.hat))^2) %*% 
+      var.pooled <- ((dat - t(design %*% B.hat))^2) %*%
         rep(1/n.array, n.array)
     }
   }
   else {
     if (!is.null(ref.batch)) {
       ref.dat <- dat[, batches[[ref]]]
-      var.pooled <- rowVars(ref.dat - t(design[batches[[ref]], 
+      var.pooled <- rowVars(ref.dat - t(design[batches[[ref]],
                                                ] %*% B.hat), na.rm = TRUE)
     }
     else {
-      var.pooled <- rowVars(dat - t(design %*% B.hat), 
+      var.pooled <- rowVars(dat - t(design %*% B.hat),
                             na.rm = TRUE)
     }
   }
@@ -107,12 +107,12 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
     tmp[, c(1:n.batch)] <- 0
     stand.mean <- stand.mean + t(tmp %*% B.hat)
   }
-  s.data <- (dat - stand.mean)/(sqrt(var.pooled) %*% t(rep(1, 
+  s.data <- (dat - stand.mean)/(sqrt(var.pooled) %*% t(rep(1,
                                                            n.array)))
   message("Fitting L/S model and finding priors")
   batch.design <- design[, 1:n.batch]
   if (!NAs) {
-    gamma.hat <- solve(crossprod(batch.design), tcrossprod(t(batch.design), 
+    gamma.hat <- solve(crossprod(batch.design), tcrossprod(t(batch.design),
                                                            as.matrix(s.data)))
   }
   else {
@@ -124,7 +124,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
       delta.hat <- rbind(delta.hat, rep(1, nrow(s.data)))
     }
     else {
-      delta.hat <- rbind(delta.hat, rowVars(s.data[, i], 
+      delta.hat <- rbind(delta.hat, rowVars(s.data[, i],
                                             na.rm = TRUE))
     }
   }
@@ -132,7 +132,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
   t2 <- rowVars(gamma.hat)
   a.prior <- apply(delta.hat, 1, aprior)
   b.prior <- apply(delta.hat, 1, bprior)
-  
+
   ####test norm distribution
   isNorm<-function(d,bar,t2){
     tryCatch({
@@ -149,7 +149,7 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
   }
   ####test inverse gamma distribution
   isInverseGamma<-function(d,a,b){
-    tryCatch({   
+    tryCatch({
       f2 <- fitdist(d, "invgamma", start=list(alpha=a, beta = b))
       g2 <- gofstat(f2)
       },
@@ -173,20 +173,20 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
   )
   names(passTest)<-levels(batch)
   addition_data<-list(gamma.hat=gamma.hat,delta.hat=delta.hat,passTest=passTest)
-  
+
   gamma.star <- delta.star <- matrix(NA, nrow = n.batch, ncol = nrow(s.data))
   if (sum(passTest==TRUE)>0) {
     message("Finding parametric adjustments")
     batchNum.par<-which(passTest==TRUE)
     results <- bplapply(batchNum.par, function(i) {
       if (mean.only) {
-        gamma.star <- postmean(gamma.hat[i, ], gamma.bar[i], 
+        gamma.star <- postmean(gamma.hat[i, ], gamma.bar[i],
                                1, 1, t2[i])
         delta.star <- rep(1, nrow(s.data))
       }
       else {
-        temp <- it.sol(s.data[, batches[[i]]], gamma.hat[i, 
-                                                         ], delta.hat[i, ], gamma.bar[i], t2[i], a.prior[i], 
+        temp <- it.sol(s.data[, batches[[i]]], gamma.hat[i,
+                                                         ], delta.hat[i, ], gamma.bar[i], t2[i], a.prior[i],
                        b.prior[i])
         gamma.star <- temp[1, ]
         delta.star <- temp[2, ]
@@ -205,9 +205,9 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
       if (mean.only) {
         delta.hat[i, ] = 1
       }
-      temp <- int.eprior(as.matrix(s.data[, batches[[i]]]), 
+      temp <- int.eprior(as.matrix(s.data[, batches[[i]]]),
                          gamma.hat[i, ], delta.hat[i, ])
-      list(gamma.star = temp[1, ], delta.star = temp[2, 
+      list(gamma.star = temp[1, ], delta.star = temp[2,
                                                      ])
     }, BPPARAM = BPPARAM)
     for (i in batchNum.no) {
@@ -223,16 +223,37 @@ combat<-function (dat, batch, mod = NULL, par.prior="auto", fit.method="mle",
   bayesdata <- s.data
   j <- 1
   for (i in batches) {
-    bayesdata[, i] <- (bayesdata[, i] - t(batch.design[i, 
-                                                       ] %*% gamma.star))/(sqrt(delta.star[j, ]) %*% t(rep(1, 
+    bayesdata[, i] <- (bayesdata[, i] - t(batch.design[i,
+                                                       ] %*% gamma.star))/(sqrt(delta.star[j, ]) %*% t(rep(1,
                                                                                                            n.batches[j])))
     j <- j + 1
   }
-  bayesdata <- (bayesdata * (sqrt(var.pooled) %*% t(rep(1, 
+  bayesdata <- (bayesdata * (sqrt(var.pooled) %*% t(rep(1,
                                                         n.array)))) + stand.mean
   if (!is.null(ref.batch)) {
     bayesdata[, batches[[ref]]] <- dat[, batches[[ref]]]
   }
   #cat(unlist(passTest))
   return(list(bayesdata=bayesdata,additiondata=addition_data))
+}
+my_it.sol<-function (sdat, g.hat, d.hat, g.bar, t2, a, b, conv = 1e-04)
+{
+  n <- rowSums(!is.na(sdat))
+  g.old <- g.hat
+  d.old <- d.hat
+  change <- 1
+  count <- 0
+  while (change > conv) {
+    g.new <- postmean(g.hat, g.bar, n, d.old, t2)
+    sum2 <- rowSums((sdat - g.new %*% t(rep(1, ncol(sdat))))^2,
+                    na.rm = TRUE)
+    d.new <- postvar(sum2, n, a, b)
+    change <- max(abs(g.new - g.old)/g.old, abs(d.new - d.old)/d.old,na.rm = T)
+    g.old <- g.new
+    d.old <- d.new
+    count <- count + 1
+  }
+  adjust <- rbind(g.new, d.new)
+  rownames(adjust) <- c("g.star", "d.star")
+  adjust
 }
